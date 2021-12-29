@@ -5,12 +5,10 @@
 class Tore: public Primtv
 {
     public:
-           void init(float R,float r,int nbtgr,int nbtpr);
-    
-          
+           void init(GLfloat R,GLfloat r,int nbtgr,int nbtpr);
+        
     protected:
             
-    
 };
 
 #endif

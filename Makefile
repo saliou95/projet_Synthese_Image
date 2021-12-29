@@ -1,12 +1,14 @@
 EXT = cpp
 CXX=g++
-CFLAGS=-Wall -I/urs/local/include
+CFLAGS=-Wall -I/usr/local/include
 CFLAGS=
 #LDFLAGS= -lGL -lGLEW -lGLU -lglut  -larmadillo
-#LDFLAGS= -lGL -lGLU -lGLEW -lglut -lm  
+#LDFLAGS= -lGL -lGLU -lGLEW -lglut -lm 
 LDFLAGS= -lGL -lGLU -lGLEW -lglut
+
 #SRC=saisieinteractive.cpp courbe.cpp
 SRC=$(wildcard *.$(EXT))
+# $(wildcard ./utilstexture/*.$(EXT))
 OBJ = $(SRC:.$(EXT)=.o)
 
 DEBUBFLAG=-g

@@ -8,6 +8,23 @@ using namespace std;
             
         }
 
+
+        vector<Sommet> Primtv::getPositions()
+        {
+            return positions;
+        }
+
+        vector<Face> Primtv:: getFaces()
+        {
+            return faces;
+        }
+
+        vector<Normale> Primtv::getNormales()
+        {
+            return normales;
+        }
+          
+
         void Primtv::afficher()
         {
             cout<<"-----------Les Coordonner des points----------" <<endl;
