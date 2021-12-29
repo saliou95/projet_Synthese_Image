@@ -1,12 +1,14 @@
 #include "Primtv.h"
 using namespace std;
-
+using namespace glm;
 
      
        Primtv::Primtv()
         {
+          
             
         }
+
 
 
         vector<Sommet> Primtv::getPositions()

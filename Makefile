@@ -4,7 +4,7 @@ CFLAGS=-Wall -I/usr/local/include
 CFLAGS=
 #LDFLAGS= -lGL -lGLEW -lGLU -lglut  -larmadillo
 #LDFLAGS= -lGL -lGLU -lGLEW -lglut -lm 
-LDFLAGS= -lGL -lGLU -lGLEW -lglut
+LDFLAGS= -lGL -lGLU -lGLEW -lglut -lglui
 
 #SRC=saisieinteractive.cpp courbe.cpp
 SRC=$(wildcard *.$(EXT))

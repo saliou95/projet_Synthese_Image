@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <vector>
+#include "Transformation.h"
 #include "../glm/glm.hpp"
 #include "../glm/gtc/matrix_transform.hpp"
 typedef struct {
@@ -46,10 +47,12 @@ class Primtv
            void addSommet(Sommet s);
            void addFace(Face f);
            void addNormale(Normale n);
+           
     protected:
              std::vector<Sommet> positions;
              std::vector<Face> faces;
              std::vector<Normale> normales; 
+             std::vector<Transformation> transformations;
                  
 };
 

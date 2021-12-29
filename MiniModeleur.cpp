@@ -1,11 +1,5 @@
-/********************************************************/
-/*                     CubeVBOShader.cpp                         */
-/********************************************************/
-/* Premiers pas avec OpenGL.                            */
-/* Objectif : afficher a l'ecran uncube avec ou sans shader    */
-/********************************************************/
 
-/* inclusion des fichiers d'en-tete Glut */
+//#include "../utilstexture/sdlglutils.h"
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -17,12 +11,10 @@
 #include <math.h>
 #include "shader.hpp"
 #include <string.h>
-
 #include "Primtv.h"
 #include "Tore.h"
-//#include "../utilstexture/sdlglutils.h"
 
-// Include GLM
+#include <GL/glui.h>
 #include "../glm/glm.hpp"
 #include "../glm/gtc/matrix_transform.hpp"
 using namespace glm;
@@ -40,6 +32,21 @@ using namespace std;
 #define NB_r 20
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
+
+ float aspectRatio;
+int main_window;
+GLUI *panneDroit, *panneGauche;
+
+
+
+
+
+
+
+
+
+
+
 GLfloat sommets[(NB_R+1)*(NB_r+1)*3] ; // x 3 coordonnées (+1 acr on double les dernierspoints pour avoir des coord de textures <> pour les points de jonctions)
 GLuint indices[NB_R*NB_r*6]; // x6 car pour chaque face quadrangulaire on a 6 indices (2 triangles=2x 3 indices)
 GLfloat coordTexture[(NB_R+1)*(NB_r+1)*2] ; // x 2 car U+V par sommets
@@ -54,13 +61,12 @@ void genereVBO();
 void deleteVBO();
 void traceObjet();
 
-// fonctions de rappel de glut
 void affichage();
 void clavier(unsigned char,int,int);
 void mouse(int, int, int, int);
 void mouseMotion(int, int);
 void reshape(int,int);
-// misc
+
 void drawString(const char *str, int x, int y, float color[4], void *font);
 void showInfo();
 void *font = GLUT_BITMAP_8_BY_13; // pour afficher des textes 2D sur l'ecran
@@ -119,47 +125,7 @@ GLuint image ;
 GLuint bufTexture,bufNormalMap;
 GLuint locationTexture,locationNormalMap;
 //-------------------------
-void createTorus(float R, float r )
-{
-	float theta, phi;
-	theta = ((float)radians(360.f))/((float)NB_R);
-	phi = ((float)(radians(360.f)))/((float)NB_r);
 
-	float pasU, pasV;
-pasU= 1./NB_R;
-pasV= 1./NB_r;
-for (int i =0;i<=NB_R;i++ )
-for (int j =0;j<=NB_r;j++ )
- {
-float a,b,c;
-	sommets[(i*(NB_r+1)*3)+ (j*3)] =   (R+r*cos((float)j*phi)) * cos((float)i*theta)    ;//x
-	sommets[(i*(NB_r+1)*3)+ (j*3)+1] =  (R+r*cos((float)j*phi)) * sin((float)i*theta)  ;//y
-	sommets[(i*(NB_r+1)*3)+ (j*3)+2] =  r*sin((float)j*phi)  ;
-	
-	normales[(i*(NB_r+1)*3)+ (j*3)] =   cos((float)j*phi)*cos((float)i*theta)    ;//x
-	normales[(i*(NB_r+1)*3)+ (j*3)+1] = cos((float)j*phi)* sin((float)i*theta)  ;//y
-	normales[(i*(NB_r+1)*3)+ (j*3)+2] =  sin((float)j*phi)  ;
-		
-   coordTexture[(i*(NB_r+1)*2)+ (j*2)]= ((float)i)*pasV;
-   coordTexture[(i*(NB_r+1)*2)+ (j*2)+1]= ((float)j)*pasV;
-}
-
-int indiceMaxI =((NB_R+1)*(NB_r))-1;
-int indiceMaxJ= (NB_r+1);
-
-for (int i =0;i<NB_R;i++ )
-for (int j =0;j<NB_r;j++ )
-{ 	
-int i0,i1,i2,i3,i4,i5;
- 	 indices[(i*NB_r*6)+ (j*6)]= (unsigned int)((i*(NB_r+1))+ j); 
-   indices[(i*NB_r*6)+ (j*6)+1]=(unsigned int)((i+1)*(NB_r+1)+ (j));
-   indices[(i*NB_r*6)+ (j*6)+2]=(unsigned int)(((i+1)*(NB_r+1))+ (j+1));
-   indices[(i*NB_r*6)+ (j*6)+3]=(unsigned int)((i*(NB_r+1))+ j);
-   indices[(i*NB_r*6)+ (j*6)+4]=(unsigned int)(((i+1)*(NB_r+1))+ (j+1));
-   indices[(i*NB_r*6)+ (j*6)+5]=(unsigned int)(((i)*(NB_r+1))+ (j+1));
-}
-
-}
 
 //----------------------------------------
 GLubyte* glmReadPPM(char* filename, int* width, int* height)
@@ -234,45 +200,29 @@ void initOpenGL(void)
   glCullFace (GL_BACK); // on spécifie queil faut éliminer les face arriere
   glEnable(GL_CULL_FACE); // on active l'élimination des faces qui par défaut n'est pas active
   glEnable(GL_DEPTH_TEST); 
-// le shader
-   programID = LoadShaders( "PhongShader.vert", "PhongShader.frag" );
- 
- 
-   // Get  handles for our matrix transformations "MVP" VIEW  MODELuniform
+  programID = LoadShaders( "PhongShader.vert", "PhongShader.frag" );
   MatrixIDMVP = glGetUniformLocation(programID, "MVP");
-//  MatrixIDView = glGetUniformLocation(programID, "VIEW");
- // MatrixIDModel = glGetUniformLocation(programID, "MODEL");
- // MatrixIDPerspective = glGetUniformLocation(programID, "PERSPECTIVE");
-
-  // Projection matrix : 65 Field of View, 1:1 ratio, display range : 1 unit <-> 1000 units
-  // ATTENTIOn l'angle est donné en radians si f GLM_FORCE_RADIANS est défini sinon en degré
   Projection = glm::perspective( glm::radians(60.f), 1.0f, 1.0f, 1000.0f);
-
-/* on recupere l'ID */
-locCameraPosition = glGetUniformLocation(programID, "cameraPosition");
-
-//locmaterialShininess = glGetUniformLocation(programID, "materialShininess");
-//locmaterialSpecularColor = glGetUniformLocation(programID, "materialSpecularColor");
-locLightPosition = glGetUniformLocation(programID, "light.position");
-locLightIntensities = glGetUniformLocation(programID, "light.intensities");//a.k.a the color of the light
-locLightAttenuation = glGetUniformLocation(programID, "light.attenuation");
-locLightAmbientCoefficient = glGetUniformLocation(programID, "light.ambientCoefficient");
-
- 
+  //glFrustum( -xy_aspect*.04, xy_aspect*.04, -.04, .04, .1, 15.0 );
+ //float a=(aspectRatio*0.04+(-aspectRatio*0.04))/(aspectRatio*0.04-(-aspectRatio*0.04));
+  //float b=
+//vec4()
+  //mat4x4();
+  locCameraPosition = glGetUniformLocation(programID, "cameraPosition");
+  locLightPosition = glGetUniformLocation(programID, "light.position");
+  locLightIntensities = glGetUniformLocation(programID, "light.intensities");//a.k.a the color of the light
+  locLightAttenuation = glGetUniformLocation(programID, "light.attenuation");
+  locLightAmbientCoefficient = glGetUniformLocation(programID, "light.ambientCoefficient");
 }
 //----------------------------------------
 int main(int argc,char **argv)
 //----------------------------------------
 {
-
-  /* initialisation de glut et creation
-     de la fenetre */
-
   glutInit(&argc,argv);
   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE|GLUT_RGB);
   glutInitWindowPosition(200,200);
   glutInitWindowSize(screenWidth,screenHeight);
-  glutCreateWindow("CUBE VBO SHADER ");
+   main_window=glutCreateWindow("Mini Modeleur");
 
 
 // Initialize GLEW
@@ -290,6 +240,57 @@ std::cout << "***** Info GPU *****" << std::endl;
 
 	initOpenGL(); 
 
+
+////////////////////////////////INTERFDACE GLUI///////////////////////////////////////////:
+
+//////////////////////////PANNE DROIT////////////////////////////
+panneDroit= GLUI_Master.create_glui_subwindow( main_window, 
+					    GLUI_SUBWINDOW_RIGHT );
+
+
+panneDroit->set_main_gfx_window( main_window );
+
+////////////////////////////////////////////////////////////////
+
+
+//////////////////////////PANNE Gauche////////////////////////////
+panneGauche= GLUI_Master.create_glui_subwindow( main_window, 
+					    GLUI_SUBWINDOW_LEFT );
+
+
+panneGauche->set_main_gfx_window( main_window );
+
+////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
    montore.init(1.,.3,40,20);
  //  createTorus(1.,.3);
 
@@ -300,10 +301,19 @@ std::cout << "***** Info GPU *****" << std::endl;
 
   /* enregistrement des fonctions de rappel */
   glutDisplayFunc(affichage);
-  glutKeyboardFunc(clavier);
-  glutReshapeFunc(reshape);
-  glutMouseFunc(mouse);
-  glutMotionFunc(mouseMotion);
+  //glutKeyboardFunc(clavier);
+  //glutReshapeFunc(reshape);
+  //glutMouseFunc(mouse);
+
+
+
+
+  GLUI_Master.set_glutReshapeFunc( reshape );  
+  GLUI_Master.set_glutKeyboardFunc( clavier );
+  GLUI_Master.set_glutSpecialFunc( NULL );
+  GLUI_Master.set_glutMouseFunc( mouse );
+  glutMotionFunc( mouseMotion );
+ 
 
   /* Entree dans la boucle principale glut */
   glutMainLoop();
@@ -444,12 +454,17 @@ void traceObjet()
 void reshape(int w, int h)
 {
     // set viewport to be the entire window
-    glViewport(0, 0, (GLsizei)w, (GLsizei)h);// ATTENTION GLsizei important - indique qu'il faut convertir en entier non négatif
+
+  int tx, ty, tw, th;
+    GLUI_Master.get_viewport_area( &tx, &ty, &tw, &th );
+ // glViewport( tx, ty, tw, th );
+
+    glViewport(tx, ty, (GLsizei)w, (GLsizei)h);// ATTENTION GLsizei important - indique qu'il faut convertir en entier non négatif
 
     // set perspective viewing frustum
-    float aspectRatio = (float)w / h;
+    aspectRatio = (float)w / h;
 
-        Projection = glm::perspective(glm::radians(60.0f),(float)(w)/(float)h, 1.0f, 1000.0f);
+    Projection = glm::perspective(glm::radians(60.0f),(float)(w)/(float)h, 1.0f, 1000.0f);
 }
 
 
@@ -579,3 +594,44 @@ void mouseMotion(int x, int y)
 
 
 
+void createTorus(float R, float r )
+{
+	float theta, phi;
+	theta = ((float)radians(360.f))/((float)NB_R);
+	phi = ((float)(radians(360.f)))/((float)NB_r);
+
+	float pasU, pasV;
+pasU= 1./NB_R;
+pasV= 1./NB_r;
+for (int i =0;i<=NB_R;i++ )
+for (int j =0;j<=NB_r;j++ )
+ {
+float a,b,c;
+	sommets[(i*(NB_r+1)*3)+ (j*3)] =   (R+r*cos((float)j*phi)) * cos((float)i*theta)    ;//x
+	sommets[(i*(NB_r+1)*3)+ (j*3)+1] =  (R+r*cos((float)j*phi)) * sin((float)i*theta)  ;//y
+	sommets[(i*(NB_r+1)*3)+ (j*3)+2] =  r*sin((float)j*phi)  ;
+	
+	normales[(i*(NB_r+1)*3)+ (j*3)] =   cos((float)j*phi)*cos((float)i*theta)    ;//x
+	normales[(i*(NB_r+1)*3)+ (j*3)+1] = cos((float)j*phi)* sin((float)i*theta)  ;//y
+	normales[(i*(NB_r+1)*3)+ (j*3)+2] =  sin((float)j*phi)  ;
+		
+   coordTexture[(i*(NB_r+1)*2)+ (j*2)]= ((float)i)*pasV;
+   coordTexture[(i*(NB_r+1)*2)+ (j*2)+1]= ((float)j)*pasV;
+}
+
+int indiceMaxI =((NB_R+1)*(NB_r))-1;
+int indiceMaxJ= (NB_r+1);
+
+for (int i =0;i<NB_R;i++ )
+for (int j =0;j<NB_r;j++ )
+{ 	
+int i0,i1,i2,i3,i4,i5;
+ 	 indices[(i*NB_r*6)+ (j*6)]= (unsigned int)((i*(NB_r+1))+ j); 
+   indices[(i*NB_r*6)+ (j*6)+1]=(unsigned int)((i+1)*(NB_r+1)+ (j));
+   indices[(i*NB_r*6)+ (j*6)+2]=(unsigned int)(((i+1)*(NB_r+1))+ (j+1));
+   indices[(i*NB_r*6)+ (j*6)+3]=(unsigned int)((i*(NB_r+1))+ j);
+   indices[(i*NB_r*6)+ (j*6)+4]=(unsigned int)(((i+1)*(NB_r+1))+ (j+1));
+   indices[(i*NB_r*6)+ (j*6)+5]=(unsigned int)(((i)*(NB_r+1))+ (j+1));
+}
+
+}
