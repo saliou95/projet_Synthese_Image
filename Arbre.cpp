@@ -18,6 +18,10 @@
 
         }
 
+        int Arbre::getTaille()
+        {
+                return lesPrimitives.size();
+        }
 
         void Arbre::afficherArbre()
 
@@ -28,6 +32,8 @@
 
         void Arbre::afficherLesPrimtv()
         {
+
+
 
 
         }

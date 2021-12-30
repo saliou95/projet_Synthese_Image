@@ -5,6 +5,7 @@
 class Tore: public Primtv
 {
     public:
+        
            void init(GLfloat R,GLfloat r,int nbtgr,int nbtpr);
         
     protected:

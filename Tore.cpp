@@ -2,7 +2,7 @@
 #include "Tore.h"
 using namespace std;
 using namespace glm;
-      
+    
   void Tore::init(GLfloat R, GLfloat r,int nbtgr,int nbtpr)
   {
     GLfloat theta, phi;

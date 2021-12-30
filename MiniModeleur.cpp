@@ -13,36 +13,29 @@
 #include <string.h>
 #include "Primtv.h"
 #include "Tore.h"
+#include "Arbre.h"
+
 #include <GL/glui.h>
 #include "../glm/glm.hpp"
 #include "../glm/gtc/matrix_transform.hpp"
 using namespace glm;
 using namespace std;
 
-float aspectRatio;
-int main_window;
-GLUI *panneDroit, *panneGauche, *panneBas;
 
-
-
-
-
-
-Tore montore;
 // initialisations
 
 void genereVBO();
 void deleteVBO();
-void traceObjet();
-
+void traceObjet(Primtv montore);
 void affichage();
 void clavier(unsigned char,int,int);
 void mouse(int, int, int, int);
 void mouseMotion(int, int);
 void reshape(int,int);
-
 void drawString(const char *str, int x, int y, float color[4], void *font);
 void showInfo();
+void interface();
+
 void *font = GLUT_BITMAP_8_BY_13; // pour afficher des textes 2D sur l'ecran
 // variables globales pour OpenGL
 bool mouseLeftDown;
@@ -52,6 +45,7 @@ float mouseX, mouseY;
 float cameraAngleX;
 float cameraAngleY;
 float cameraDistance=0.;
+float aspectRatio;
 
 // variables Handle d'opengl 
 //--------------------------
@@ -85,13 +79,22 @@ vec3 LightIntensities(1.,1.,1.);// couleur la lumiere
 GLfloat LightAttenuation =1.;
 GLfloat LightAmbientCoefficient=.1;
 
-glm::mat4 MVP;      // justement la voilà
+glm::mat4 MVP;    
+glm::mat4 MVP2;   // justement la voilà
 glm::mat4 Model, View, Projection;    // Matrices constituant MVP
-
-
 
 int screenHeight = 500;
 int screenWidth = 500;
+
+
+//interface graphique//
+int main_window;
+GLUI *panneDroit, *panneGauche, *panneBas;
+
+Tore t;
+Tore montore;
+Arbre a;
+int nbPrimtv=0;
 
 
 //----------------------------------------
@@ -110,86 +113,7 @@ void initOpenGL(void)
   locLightAttenuation = glGetUniformLocation(programID, "light.attenuation");
   locLightAmbientCoefficient = glGetUniformLocation(programID, "light.ambientCoefficient");
 }
-
-int main(int argc,char **argv)
-
-{
-  glutInit(&argc,argv);
-  glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE|GLUT_RGB);
-  glutInitWindowPosition(200,200);
-  glutInitWindowSize(screenWidth,screenHeight);
-   main_window=glutCreateWindow("Mini Modeleur");
-
-
-// Initialize GLEW
-	if (glewInit() != GLEW_OK) {
-		fprintf(stderr, "Failed to initialize GLEW\n");
-		return -1;
-	}
-
-//info version GLSL
-std::cout << "***** Info GPU *****" << std::endl;
-    std::cout << "Fabricant : " << glGetString (GL_VENDOR) << std::endl;
-    std::cout << "Carte graphique: " << glGetString (GL_RENDERER) << std::endl;
-    std::cout << "Version : " << glGetString (GL_VERSION) << std::endl;
-    std::cout << "Version GLSL : " << glGetString (GL_SHADING_LANGUAGE_VERSION) << std::endl << std::endl;
-
-	initOpenGL(); 
-
-
-////////////////////////////////INTERFDACE GLUI///////////////////////////////////////////:
-
-//////////////////////////PANNE DROIT////////////////////////////
-panneDroit= GLUI_Master.create_glui_subwindow( main_window, 
-					    GLUI_SUBWINDOW_RIGHT );
-
-
-panneDroit->set_main_gfx_window( main_window );
-
-////////////////////////////////////////////////////////////////
-
-
-//////////////////////////PANNE Gauche////////////////////////////
-panneGauche= GLUI_Master.create_glui_subwindow( main_window, 
-					    GLUI_SUBWINDOW_LEFT );
-
-
-panneGauche->set_main_gfx_window( main_window );
-
-////////////////////////////////////////////////////////////////
-
-
-//////////////////////////PANNE Bas////////////////////////////
-panneBas= GLUI_Master.create_glui_subwindow( main_window, 
-					    GLUI_SUBWINDOW_BOTTOM );
-
-
-panneBas->set_main_gfx_window( main_window );
-
-/////////////////////////////////
-
-
-montore.init(1.,.3,40,20);
-  genereVBO();
-  //initTexture();
-  glutDisplayFunc(affichage);
-  GLUI_Master.set_glutReshapeFunc( reshape );  
-  GLUI_Master.set_glutKeyboardFunc( clavier );
-  GLUI_Master.set_glutSpecialFunc( NULL );
-  GLUI_Master.set_glutMouseFunc( mouse );
-  glutMotionFunc( mouseMotion );
- 
-
-  /* Entree dans la boucle principale glut */
-  glutMainLoop();
-
-  glDeleteProgram(programID);
-  deleteVBO();
-  return 0;
-}
-
-
-void genereVBO ()
+void genereVBO (Primtv maprimitive)
 {
   
     glGenBuffers(1, &VAO);
@@ -198,19 +122,19 @@ void genereVBO ()
     if(glIsBuffer(VBO_sommets) == GL_TRUE) glDeleteBuffers(1, &VBO_sommets);
     glGenBuffers(1, &VBO_sommets);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_sommets);
-    glBufferData(GL_ARRAY_BUFFER, montore.getPositions().size()*sizeof(Sommet),&montore.getPositions()[0] , GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, maprimitive.getPositions().size()*sizeof(Sommet),&maprimitive.getPositions()[0] , GL_STATIC_DRAW);
     glVertexAttribPointer ( indexVertex, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
 
     if(glIsBuffer(VBO_normales) == GL_TRUE) glDeleteBuffers(1, &VBO_normales);
     glGenBuffers(1, &VBO_normales);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_normales);
-    glBufferData(GL_ARRAY_BUFFER, montore.getNormales().size()*sizeof(Normale),&montore.getNormales()[0]  , GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, maprimitive.getNormales().size()*sizeof(Normale),&maprimitive.getNormales()[0]  , GL_STATIC_DRAW);
     glVertexAttribPointer ( indexNormale, 3, GL_FLOAT, GL_FALSE, 0, (void*)0  );
 
     if(glIsBuffer(VBO_indices) == GL_TRUE) glDeleteBuffers(1, &VBO_indices);
     glGenBuffers(1, &VBO_indices); // ATTENTIOn IBO doit etre un GL_ELEMENT_ARRAY_BUFFER
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VBO_indices);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, montore.getFaces().size()*sizeof(Face),&montore.getFaces()[0]  , GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, maprimitive.getFaces().size()*sizeof(Face),&maprimitive.getFaces()[0]  , GL_STATIC_DRAW);
  /*
     if(glIsBuffer(VBO_UVtext) == GL_TRUE) glDeleteBuffers(1, &VBO_UVtext);
     glGenBuffers(1, &VBO_UVtext);
@@ -240,8 +164,6 @@ void deleteVBO ()
         glDeleteBuffers(1, &VAO);
 }
 
-
-
 /* fonction d'affichage */
 void affichage()
 {
@@ -264,15 +186,24 @@ void affichage()
      Model = glm::rotate(Model,glm::radians(cameraAngleX),glm::vec3(1, 0, 0) );
      Model = glm::rotate(Model,glm::radians(cameraAngleY),glm::vec3(0, 1, 0) );
      Model = glm::scale(Model,glm::vec3(.5, .5, .5));
-     MVP = Projection * View * Model;
+     
+     for(int i=0 ;i<nbPrimtv;i++)
+      {
+        Primtv p=a.getPrimtv(i);
+              genereVBO(p);
+       
+      MVP = Projection * View* (Model*p.getmodel());
+              traceObjet(p); 
+          
+          
+      }      
+          // trace VBO avec ou sans shader
+
+    //Model = glm::translate(Model,glm::vec3(0,0,cameraDistance));
+    //Model = glm::scale(Model,glm::vec3(.2, .2, .2));
+
+
     
-     traceObjet();        // trace VBO avec ou sans shader
-
-    Model = glm::translate(Model,glm::vec3(0,0,cameraDistance));
-    Model = glm::scale(Model,glm::vec3(.2, .2, .2));
-    MVP = Projection * View * Model;
-    traceObjet();  
-
     /* on force l'affichage du resultat */
       glutPostRedisplay();
       glutSwapBuffers();
@@ -280,10 +211,9 @@ void affichage()
 
 
 
-
 //-------------------------------------
 //Trace le tore 2 via le VAO
-void traceObjet()
+void traceObjet(Primtv maprimitive)
 //-------------------------------------
 {
  // Use  shader & MVP matrix   MVP = Projection * View * Model;
@@ -294,10 +224,7 @@ void traceObjet()
  //glUniformMatrix4fv(MatrixIDView, 1, GL_FALSE,&View[0][0]);
  //glUniformMatrix4fv(MatrixIDModel, 1, GL_FALSE, &Model[0][0]);
  //glUniformMatrix4fv(MatrixIDPerspective, 1, GL_FALSE, &Projection[0][0]);
-
  glUniform3f(locCameraPosition,cameraPosition.x, cameraPosition.y, cameraPosition.z);
-
-
 // glUniform1f(locmaterialShininess,materialShininess);
  //glUniform3f(locmaterialSpecularColor,materialSpecularColor.x,materialSpecularColor.y,materialSpecularColor.z);
  glUniform3f(locLightPosition,LightPosition.x,LightPosition.y,LightPosition.z);
@@ -305,12 +232,11 @@ void traceObjet()
  glUniform1f(locLightAttenuation,LightAttenuation);
  glUniform1f(locLightAmbientCoefficient,LightAmbientCoefficient);
 
- 
 //pour l'affichage
-	glBindVertexArray(VAO); // on active le VAO
-   glDrawElements(GL_TRIANGLES,montore.getFaces().size()*sizeof(Face), GL_UNSIGNED_INT, 0);// on appelle la fonction dessin 
-	glBindVertexArray(0);    // on desactive les VAO
-  glUseProgram(0);         // et le pg
+   glBindVertexArray(VAO); // on active le VAO
+   glDrawElements(GL_TRIANGLES,maprimitive.getFaces().size()*sizeof(Face), GL_UNSIGNED_INT, 0);// on appelle la fonction dessin 
+   glBindVertexArray(0);    // on desactive les VAO
+   glUseProgram(0);         // et le pg
 
 }
 
@@ -452,3 +378,78 @@ void mouseMotion(int x, int y)
     glutPostRedisplay();
 }
 
+
+void interface()
+{
+
+    //////////////////////////PANNE DROIT////////////////////////////
+    panneDroit= GLUI_Master.create_glui_subwindow( main_window, GLUI_SUBWINDOW_RIGHT );
+    panneDroit->set_main_gfx_window( main_window );
+
+
+    //////////////////////////PANNE Gauche////////////////////////////
+    panneGauche= GLUI_Master.create_glui_subwindow( main_window, GLUI_SUBWINDOW_LEFT );
+    panneGauche->set_main_gfx_window( main_window );
+
+    //////////////////////////PANNE Bas////////////////////////////
+    panneBas= GLUI_Master.create_glui_subwindow( main_window, GLUI_SUBWINDOW_BOTTOM );
+    panneBas->set_main_gfx_window( main_window );
+
+
+    glutDisplayFunc(affichage);
+    GLUI_Master.set_glutReshapeFunc( reshape );  
+    GLUI_Master.set_glutKeyboardFunc( clavier );
+    GLUI_Master.set_glutSpecialFunc( NULL );
+    GLUI_Master.set_glutMouseFunc( mouse );
+    glutMotionFunc( mouseMotion );
+
+
+
+}
+
+
+int main(int argc,char **argv)
+
+{
+  glutInit(&argc,argv);
+  glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE|GLUT_RGB);
+  glutInitWindowPosition(200,200);
+  glutInitWindowSize(screenWidth,screenHeight);
+   main_window=glutCreateWindow("Mini Modeleur");
+// Initialize GLEW
+	if (glewInit() != GLEW_OK) {
+		fprintf(stderr, "Failed to initialize GLEW\n");
+		return -1;
+	}
+
+//info version GLSL
+std::cout << "***** Info GPU *****" << std::endl;
+    std::cout << "Fabricant : " << glGetString (GL_VENDOR) << std::endl;
+    std::cout << "Carte graphique: " << glGetString (GL_RENDERER) << std::endl;
+    std::cout << "Version : " << glGetString (GL_VERSION) << std::endl;
+    std::cout << "Version GLSL : " << glGetString (GL_SHADING_LANGUAGE_VERSION) << std::endl << std::endl;
+
+	initOpenGL(); 
+
+
+
+
+montore.init(1.,.3,40,20);
+montore.roter(90,vec3(1,0,0));
+montore.translater(vec3(1,0,0));
+
+a.addPrimtv(montore);
+
+t.init(2,.1,40,20);
+
+a.addPrimtv(t);
+nbPrimtv=a.getTaille();
+interface();
+ 
+  /* Entree dans la boucle principale glut */
+  glutMainLoop();
+
+  glDeleteProgram(programID);
+  deleteVBO();
+  return 0;
+}

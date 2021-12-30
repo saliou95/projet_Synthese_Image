@@ -1,5 +1,6 @@
 #ifndef DEF_PRIMTV
 #define DEF_PRIMTV
+
 #include <GL/glew.h>
 #include <iostream>
 #include <math.h>
@@ -7,7 +8,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <vector>
-#include "Transformation.h"
 #include "../glm/glm.hpp"
 #include "../glm/gtc/matrix_transform.hpp"
 typedef struct {
@@ -42,18 +42,21 @@ class Primtv
            std::vector<Sommet> getPositions();
            std::vector<Face> getFaces();
            std::vector<Normale> getNormales();
-            
+           glm::mat4 getmodel();
            void afficher();
            void addSommet(Sommet s);
            void addFace(Face f);
            void addNormale(Normale n);
-           
+           void miaech(glm::vec3 scamat );
+           void translater(glm::vec3 transvect );
+           void roter(float angle,glm::vec3 rotmat );
     protected:
              std::vector<Sommet> positions;
              std::vector<Face> faces;
              std::vector<Normale> normales; 
-             std::vector<Transformation> transformations;
-                 
+          
+             glm::mat4 model=glm::mat4(1.0);
+            
 };
 
 #endif

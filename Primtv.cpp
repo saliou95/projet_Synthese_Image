@@ -5,10 +5,9 @@ using namespace glm;
      
        Primtv::Primtv()
         {
-          
+            
             
         }
-
 
 
         vector<Sommet> Primtv::getPositions()
@@ -65,6 +64,31 @@ using namespace glm;
     
         }
 
+        void Primtv::miaech(glm::vec3 scamat )
+        {
+            model=scale(model,scamat);
+
+        }
 
 
 
+        void Primtv::translater(glm::vec3 transvect)
+        {
+            model=translate(model,transvect);
+        
+        }
+
+
+        void Primtv::roter(float angle,glm::vec3 rotmat )
+        {
+             model=rotate(model,glm::radians(angle),rotmat);
+
+        
+        }
+
+           mat4 Primtv::getmodel()
+           {
+
+
+               return model;
+           }

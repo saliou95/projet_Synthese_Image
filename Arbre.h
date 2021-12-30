@@ -16,8 +16,9 @@ class Arbre
            Arbre();
 
            Primtv getPrimtv(int i);
-          
-         
+
+           int getTaille();
+
            void addPrimtv(Primtv p);
           
            void removePrimtv (int i); 
@@ -25,6 +26,7 @@ class Arbre
            void afficherArbre();
            
            void afficherLesPrimtv();
+           
            
            
     protected:
