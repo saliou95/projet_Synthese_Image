@@ -55,7 +55,10 @@ class Primtv
              std::vector<Face> faces;
              std::vector<Normale> normales; 
           
-             glm::mat4 model=glm::mat4(1.0);
+           //  glm::mat4 model=glm::mat4(1.0);
+             glm::mat4 rotmodel=glm::mat4(1.0f);
+             glm::mat4 transmodel=glm::mat4(1.0f);
+             glm::mat4 scamodel=glm::mat4(1.0f);
             
 };
 

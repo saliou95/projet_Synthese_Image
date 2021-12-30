@@ -66,7 +66,7 @@ using namespace glm;
 
         void Primtv::miaech(glm::vec3 scamat )
         {
-            model=scale(model,scamat);
+            scamodel=scale(scamodel,scamat);
 
         }
 
@@ -74,14 +74,14 @@ using namespace glm;
 
         void Primtv::translater(glm::vec3 transvect)
         {
-            model=translate(model,transvect);
+            transmodel=translate(transmodel,transvect);
         
         }
 
 
         void Primtv::roter(float angle,glm::vec3 rotmat )
         {
-             model=rotate(model,glm::radians(angle),rotmat);
+             rotmodel=rotate(rotmodel,glm::radians(angle),rotmat);
 
         
         }
@@ -90,5 +90,5 @@ using namespace glm;
            {
 
 
-               return model;
+               return scamodel*transmodel*rotmodel ;
            }
