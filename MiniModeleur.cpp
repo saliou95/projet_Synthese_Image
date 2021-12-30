@@ -13,44 +13,18 @@
 #include <string.h>
 #include "Primtv.h"
 #include "Tore.h"
-
 #include <GL/glui.h>
 #include "../glm/glm.hpp"
 #include "../glm/gtc/matrix_transform.hpp"
 using namespace glm;
 using namespace std;
 
-#define P_SIZE 3
-#define N_SIZE 3		// c'est forcement 3
-#define C_SIZE 3
-
-#define N_VERTS  8
-#define N_VERTS_BY_FACE  3
-#define N_FACES  12
-
-#define NB_R 40
-#define NB_r 20
-#define BUFFER_OFFSET(i) ((char *)NULL + (i))
-
-
- float aspectRatio;
+float aspectRatio;
 int main_window;
-GLUI *panneDroit, *panneGauche;
+GLUI *panneDroit, *panneGauche, *panneBas;
 
 
 
-
-
-
-
-
-
-
-
-GLfloat sommets[(NB_R+1)*(NB_r+1)*3] ; // x 3 coordonnées (+1 acr on double les dernierspoints pour avoir des coord de textures <> pour les points de jonctions)
-GLuint indices[NB_R*NB_r*6]; // x6 car pour chaque face quadrangulaire on a 6 indices (2 triangles=2x 3 indices)
-GLfloat coordTexture[(NB_R+1)*(NB_r+1)*2] ; // x 2 car U+V par sommets
-GLfloat normales[(NB_R+1)*(NB_r+1)*3];
 
 
 
@@ -119,80 +93,7 @@ glm::mat4 Model, View, Projection;    // Matrices constituant MVP
 int screenHeight = 500;
 int screenWidth = 500;
 
-// pour la texcture
-//-------------------
-GLuint image ;
-GLuint bufTexture,bufNormalMap;
-GLuint locationTexture,locationNormalMap;
-//-------------------------
 
-
-//----------------------------------------
-GLubyte* glmReadPPM(char* filename, int* width, int* height)
-//----------------------------------------
-{
-    FILE* fp;
-    int i, w, h, d;
-    unsigned char* image;
-    char head[70];          /* max line <= 70 in PPM (per spec). */
-    
-    fp = fopen(filename, "rb");
-    if (!fp) {
-        perror(filename);
-        return NULL;
-    }
-    
-    /* grab first two chars of the file and make sure that it has the
-       correct magic cookie for a raw PPM file. */
-    fgets(head, 70, fp);
-    if (strncmp(head, "P6", 2)) {
-        fprintf(stderr, "%s: Not a raw PPM file\n", filename);
-        return NULL;
-    }
-    
-    /* grab the three elements in the header (width, height, maxval). */
-    i = 0;
-    while(i < 3) {
-        fgets(head, 70, fp);
-        if (head[0] == '#')     /* skip comments. */
-            continue;
-        if (i == 0)
-            i += sscanf(head, "%d %d %d", &w, &h, &d);
-        else if (i == 1)
-            i += sscanf(head, "%d %d", &h, &d);
-        else if (i == 2)
-            i += sscanf(head, "%d", &d);
-    }
-    
-    /* grab all the image data in one fell swoop. */
-    image = new unsigned char[w*h*3];
-    fread(image, sizeof(unsigned char), w*h*3, fp);
-    fclose(fp);
-    
-    *width = w;
-    *height = h;
-    return image;
-}
-
-//----------------------------------------
-void initTexture(void)
-//-----------------------------------------
-{
- int iwidth  , iheight;
-   GLubyte *  image = NULL;
- 
-  //  image = glmReadPPM("./texture/Metalcolor.ppm", &iwidth, &iheight);
-	 glGenTextures(1, &bufTexture);	
-	 glBindTexture(GL_TEXTURE_2D, bufTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	 glTexImage2D(GL_TEXTURE_2D, 0, 3, iwidth,iheight, 0, GL_RGB,GL_UNSIGNED_BYTE,image);
-   
-    locationTexture = glGetUniformLocation(programID, "myTextureSampler"); // et il y a la texture elle même  
- //   glBindAttribLocation(programID,indexUVTexture,"vertexUV");	// il y a les coord UV  
-}
 //----------------------------------------
 void initOpenGL(void)
 //----------------------------------------
@@ -203,20 +104,15 @@ void initOpenGL(void)
   programID = LoadShaders( "PhongShader.vert", "PhongShader.frag" );
   MatrixIDMVP = glGetUniformLocation(programID, "MVP");
   Projection = glm::perspective( glm::radians(60.f), 1.0f, 1.0f, 1000.0f);
-  //glFrustum( -xy_aspect*.04, xy_aspect*.04, -.04, .04, .1, 15.0 );
- //float a=(aspectRatio*0.04+(-aspectRatio*0.04))/(aspectRatio*0.04-(-aspectRatio*0.04));
-  //float b=
-//vec4()
-  //mat4x4();
   locCameraPosition = glGetUniformLocation(programID, "cameraPosition");
   locLightPosition = glGetUniformLocation(programID, "light.position");
   locLightIntensities = glGetUniformLocation(programID, "light.intensities");//a.k.a the color of the light
   locLightAttenuation = glGetUniformLocation(programID, "light.attenuation");
   locLightAmbientCoefficient = glGetUniformLocation(programID, "light.ambientCoefficient");
 }
-//----------------------------------------
+
 int main(int argc,char **argv)
-//----------------------------------------
+
 {
   glutInit(&argc,argv);
   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE|GLUT_RGB);
@@ -263,51 +159,20 @@ panneGauche->set_main_gfx_window( main_window );
 ////////////////////////////////////////////////////////////////
 
 
+//////////////////////////PANNE Bas////////////////////////////
+panneBas= GLUI_Master.create_glui_subwindow( main_window, 
+					    GLUI_SUBWINDOW_BOTTOM );
+
+
+panneBas->set_main_gfx_window( main_window );
+
 /////////////////////////////////
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   montore.init(1.,.3,40,20);
- //  createTorus(1.,.3);
-
- // construction des VBO a partir des tableaux du cube deja construit
+montore.init(1.,.3,40,20);
   genereVBO();
   //initTexture();
-  
-
-  /* enregistrement des fonctions de rappel */
   glutDisplayFunc(affichage);
-  //glutKeyboardFunc(clavier);
-  //glutReshapeFunc(reshape);
-  //glutMouseFunc(mouse);
-
-
-
-
   GLUI_Master.set_glutReshapeFunc( reshape );  
   GLUI_Master.set_glutKeyboardFunc( clavier );
   GLUI_Master.set_glutSpecialFunc( NULL );
@@ -329,7 +194,6 @@ void genereVBO ()
   
     glGenBuffers(1, &VAO);
     glBindVertexArray(VAO); // ici on bind le VAO , c'est lui qui recupèrera les configurations des VBO glVertexAttribPointer , glEnableVertexAttribArray...
-
 
     if(glIsBuffer(VBO_sommets) == GL_TRUE) glDeleteBuffers(1, &VBO_sommets);
     glGenBuffers(1, &VBO_sommets);
@@ -389,6 +253,7 @@ void affichage()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glColor3f(1.0,1.0,1.0);
   glPointSize(2.0);
+
  
      View       = glm::lookAt(   cameraPosition, // Camera is at (0,0,3), in World Space
                                             glm::vec3(0,0,0), // and looks at the origin
@@ -398,19 +263,19 @@ void affichage()
      Model = glm::translate(Model,glm::vec3(0,0,cameraDistance));
      Model = glm::rotate(Model,glm::radians(cameraAngleX),glm::vec3(1, 0, 0) );
      Model = glm::rotate(Model,glm::radians(cameraAngleY),glm::vec3(0, 1, 0) );
-     Model = glm::scale(Model,glm::vec3(.8, .8, .8));
+     Model = glm::scale(Model,glm::vec3(.5, .5, .5));
      MVP = Projection * View * Model;
     
      traceObjet();        // trace VBO avec ou sans shader
 
-Model = glm::translate(Model,glm::vec3(0,0,cameraDistance));
-Model = glm::scale(Model,glm::vec3(.5, .5, .5));
-MVP = Projection * View * Model;
-traceObjet();  
+    Model = glm::translate(Model,glm::vec3(0,0,cameraDistance));
+    Model = glm::scale(Model,glm::vec3(.2, .2, .2));
+    MVP = Projection * View * Model;
+    traceObjet();  
 
- /* on force l'affichage du resultat */
-   glutPostRedisplay();
-   glutSwapBuffers();
+    /* on force l'affichage du resultat */
+      glutPostRedisplay();
+      glutSwapBuffers();
 }
 
 
@@ -421,8 +286,6 @@ traceObjet();
 void traceObjet()
 //-------------------------------------
 {
-  cout<<"tracer l'objet"<<endl;
-   cout<<"tracer jkhvfjkvgjhvjkhl'objet"<<endl;
  // Use  shader & MVP matrix   MVP = Projection * View * Model;
  glUseProgram(programID);
 
@@ -458,8 +321,9 @@ void reshape(int w, int h)
   int tx, ty, tw, th;
     GLUI_Master.get_viewport_area( &tx, &ty, &tw, &th );
  // glViewport( tx, ty, tw, th );
+   glViewport( tx, ty, tw, th );
 
-    glViewport(tx, ty, (GLsizei)w, (GLsizei)h);// ATTENTION GLsizei important - indique qu'il faut convertir en entier non négatif
+   // glViewport(tx, ty, (GLsizei)w, (GLsizei)h);// ATTENTION GLsizei important - indique qu'il faut convertir en entier non négatif
 
     // set perspective viewing frustum
     aspectRatio = (float)w / h;
@@ -588,50 +452,3 @@ void mouseMotion(int x, int y)
     glutPostRedisplay();
 }
 
-
-
-
-
-
-
-void createTorus(float R, float r )
-{
-	float theta, phi;
-	theta = ((float)radians(360.f))/((float)NB_R);
-	phi = ((float)(radians(360.f)))/((float)NB_r);
-
-	float pasU, pasV;
-pasU= 1./NB_R;
-pasV= 1./NB_r;
-for (int i =0;i<=NB_R;i++ )
-for (int j =0;j<=NB_r;j++ )
- {
-float a,b,c;
-	sommets[(i*(NB_r+1)*3)+ (j*3)] =   (R+r*cos((float)j*phi)) * cos((float)i*theta)    ;//x
-	sommets[(i*(NB_r+1)*3)+ (j*3)+1] =  (R+r*cos((float)j*phi)) * sin((float)i*theta)  ;//y
-	sommets[(i*(NB_r+1)*3)+ (j*3)+2] =  r*sin((float)j*phi)  ;
-	
-	normales[(i*(NB_r+1)*3)+ (j*3)] =   cos((float)j*phi)*cos((float)i*theta)    ;//x
-	normales[(i*(NB_r+1)*3)+ (j*3)+1] = cos((float)j*phi)* sin((float)i*theta)  ;//y
-	normales[(i*(NB_r+1)*3)+ (j*3)+2] =  sin((float)j*phi)  ;
-		
-   coordTexture[(i*(NB_r+1)*2)+ (j*2)]= ((float)i)*pasV;
-   coordTexture[(i*(NB_r+1)*2)+ (j*2)+1]= ((float)j)*pasV;
-}
-
-int indiceMaxI =((NB_R+1)*(NB_r))-1;
-int indiceMaxJ= (NB_r+1);
-
-for (int i =0;i<NB_R;i++ )
-for (int j =0;j<NB_r;j++ )
-{ 	
-int i0,i1,i2,i3,i4,i5;
- 	 indices[(i*NB_r*6)+ (j*6)]= (unsigned int)((i*(NB_r+1))+ j); 
-   indices[(i*NB_r*6)+ (j*6)+1]=(unsigned int)((i+1)*(NB_r+1)+ (j));
-   indices[(i*NB_r*6)+ (j*6)+2]=(unsigned int)(((i+1)*(NB_r+1))+ (j+1));
-   indices[(i*NB_r*6)+ (j*6)+3]=(unsigned int)((i*(NB_r+1))+ j);
-   indices[(i*NB_r*6)+ (j*6)+4]=(unsigned int)(((i+1)*(NB_r+1))+ (j+1));
-   indices[(i*NB_r*6)+ (j*6)+5]=(unsigned int)(((i)*(NB_r+1))+ (j+1));
-}
-
-}
