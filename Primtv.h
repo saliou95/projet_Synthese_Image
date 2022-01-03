@@ -64,7 +64,7 @@ class Primtv
              glm::mat4 transmodel=glm::mat4(1.0f);
              glm::mat4 scamodel=glm::mat4(1.0f);
     public:
-             int show=0;
+             int show=1;
              std::string nom;
              int ID;
             

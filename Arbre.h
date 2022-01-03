@@ -24,11 +24,12 @@ class Arbre
           
            void removePrimtv (int i); 
          
+           void removeAll(); 
+           
            void Changeshow(int i);
 
            void afficherLesPrimtv();
-           
-           void reshape(); 
+  
               
          
            

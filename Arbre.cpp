@@ -18,24 +18,30 @@
 
         void Arbre::addPrimtv( Primtv p)
         {
-        lesPrimitives.push_back(p);
-
+         lesPrimitives.push_back(p);
         }
+
         void Arbre::Changeshow(int i)
         {
             if(lesPrimitives[i].show==1)
-          lesPrimitives[i].show=0;
-            else
-           lesPrimitives[i].show=1;
-        }
-
-
-        void Arbre::reshape()
-        {
-                for(int i=0;i<getTaille();i++)
                 lesPrimitives[i].show=0;
-
+            else
+                lesPrimitives[i].show=1;
         }
+
+        void Arbre::removePrimtv(int i)
+        {
+          lesPrimitives.erase(lesPrimitives.begin()+i);
+        }
+
+        void Arbre:: removeAll()
+        {
+         lesPrimitives.clear(); 
+
+        } 
+
+
+      
         void Arbre::afficherLesPrimtv()
         {
 

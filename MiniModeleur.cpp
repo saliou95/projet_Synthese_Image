@@ -421,29 +421,39 @@ void mouseMotion(int x, int y)
              }
    
      
-       void defineshow(int i)
+      void defineshow(int i)
        {
               a.Changeshow(i);
               //cout<< a.getPrimtv(i).show<<endl;
+              
        }
-        void afficherArbre(GLUI *parentremove)
+
+      void supprimerPrimtv(int i)
+      {
+        if(primtvCourant==0)
+        a.removeAll();
+        else
+        a.removePrimtv(primtvCourant-1);
+        interface();
+      }
+
+      void afficherArbre(GLUI *parentremove)
 
         {
-          show=0;
-          a.reshape();
-           Complexiter1  =new GLUI_Spinner( parentremove, "",&complexiter1);
-          Complexiter1->set_int_limits(10,200);
-            Complexiter2  =new GLUI_Spinner( parentremove, "",&complexiter2);
-          Complexiter2->set_int_limits(10,200);
+         
+        
+          
          arbre=new GLUI_Rollout(parentremove, "Arbre", true );
 
          
          for(int i=0;i<a.getTaille();i++)
          {     
+            show=a.getPrimtv(i).show;
                  new GLUI_Checkbox( arbre,a.getPrimtv(i).nom.c_str(),&show,i,defineshow);
                 // new GLUI_StaticText( arbre, "" );
          }
-        
+          new GLUI_StaticText( arbre, "" );
+        new GLUI_Button(arbre, "Modifier");
          new GLUI_Column( arbre, true );
         courantPrimtv= new GLUI_RadioGroup(arbre,&primtvCourant);
      
@@ -454,22 +464,22 @@ void mouseMotion(int x, int y)
                 
           new GLUI_RadioButton(courantPrimtv,"");
          }
-        new GLUI_Column( arbre, true );
+      //  new GLUI_Column( arbre, true );
         
 
-         for(int i=0;i<a.getTaille();i++)
-         {           
-        
-         new GLUI_Button(arbre, "Sup");
-         }
-       
-
+         new GLUI_Button(arbre, "Supprimer",-1,supprimerPrimtv);
+         
 }
 
 void afficheAjout(GLUI *parentAdd)
 {
 
-    ajout=new GLUI_Rollout(parentAdd, "AjouterPrimitives", true );
+
+        Complexiter1  =new GLUI_Spinner( parentAdd, "",&complexiter1);
+        Complexiter1->set_int_limits(10,200);
+        Complexiter2  =new GLUI_Spinner( parentAdd, "",&complexiter2);
+        Complexiter2->set_int_limits(10,200);
+        ajout=new GLUI_Rollout(parentAdd, "AjouterPrimitives", true );
 
         for (int i=0;i< nbPrivDiff;i++)
         {
