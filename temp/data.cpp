@@ -38,9 +38,10 @@ float sphere_rotate[16] = { 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 };
 float torus_rotate[16] = { 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 };
 float view_rotate[16] = { 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 };
 float obj_pos[] = { 0.0, 0.0, 0.0 };
-string string_list[] = { "Hello World!", "Foo", "Testing...", "Bounding box: on" };
+string string_list[] = { "Hello World!", "Foo", "Testing...", "Bounding box: on","Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on","Hello World!", "Foo", "Testing...", "Bounding box: on","Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on""Hello World!", "Foo", "Testing...", "Bounding box: on" };
 int   curr_string = 0;
 
+int primtvCourant=0;
 /** Pointers to the windows and some of the controls we'll create **/
 GLUI *glui, *glui2;
 GLUI_Spinner    *light0_spinner, *light1_spinner;
@@ -56,7 +57,7 @@ GLUI_Panel      *obj_panel;
 #define DISABLE_ID           301
 #define SHOW_ID              302
 #define HIDE_ID              303
-
+#define ID              0
 
 /********** Miscellaneous global variables **********/
 
@@ -71,7 +72,15 @@ GLfloat light1_position[] = {-1.0f, -1.0f, 1.0f, 0.0f};
 GLfloat lights_rotation[16] = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 };
 
 /**************************************** control_cb() *******************/
-/* GLUI control callback                                                 */
+/* GLUI control callback       
+                                          */
+
+
+void affiche (int i)
+{
+
+  std::cout <<primtvCourant<<"  zezfz  "<<i<<endl;
+}
 
 void control_cb( int control )
 {
@@ -428,12 +437,21 @@ int main(int argc, char* argv[])
   new GLUI_Checkbox( options, "Draw axes", &show_axes );
   new GLUI_Checkbox( options, "Draw text", &show_text );
 
+ new GLUI_Column( options, true );
+  GLUI_RadioGroup *SS= new GLUI_RadioGroup(options,&primtvCourant,ID,affiche);
+new GLUI_RadioButton(SS,"1");
+new GLUI_RadioButton(SS,"2");
+new GLUI_RadioButton(SS,"2");
+new GLUI_RadioButton(SS,"2");
+new GLUI_RadioButton(SS,"2");
+
+
   /**** Add listbox ****/
   new GLUI_StaticText( glui, "" );
   GLUI_Listbox *list = new GLUI_Listbox( glui, "Text:", &curr_string );
   int i;
   
-  for( i=0; i<4; i++ )
+  for( i=0; i<80; i++ )
 
 {
   
@@ -471,7 +489,7 @@ int main(int argc, char* argv[])
 
   GLUI_Rotation *view_rot = new GLUI_Rotation(glui2, "Objects", view_rotate );
   view_rot->set_spin( 1.0 );
-  new GLUI_Column( glui2, false );
+  new GLUI_Column( glui2, true );
   GLUI_Rotation *sph_rot = new GLUI_Rotation(glui2, "Sphere", sphere_rotate );
   sph_rot->set_spin( .98 );
   new GLUI_Column( glui2, false );
@@ -483,7 +501,7 @@ int main(int argc, char* argv[])
   new GLUI_Column( glui2, false );
   GLUI_Translation *trans_xy = 
     new GLUI_Translation(glui2, "Objects XY", GLUI_TRANSLATION_XY, obj_pos );
-  trans_xy->set_speed( .005 );
+  trans_xy->set_speed( .00000000000005 );
   new GLUI_Column( glui2, false );
   GLUI_Translation *trans_x = 
     new GLUI_Translation(glui2, "Objects X", GLUI_TRANSLATION_X, obj_pos );

@@ -11,6 +11,10 @@
         return lesPrimitives[i];
 
         }
+          int Arbre::getTaille()
+        {
+                return lesPrimitives.size();
+        }
 
         void Arbre::addPrimtv( Primtv p)
         {
@@ -18,17 +22,7 @@
 
         }
 
-        int Arbre::getTaille()
-        {
-                return lesPrimitives.size();
-        }
 
-        void Arbre::afficherArbre()
-
-        {
-
-
-        }
 
         void Arbre::afficherLesPrimtv()
         {
@@ -37,3 +31,4 @@
 
 
         }
+        //cstr from string to char 

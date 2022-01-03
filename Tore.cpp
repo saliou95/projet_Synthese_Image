@@ -5,6 +5,9 @@ using namespace glm;
     
   void Tore::init(GLfloat R, GLfloat r,int nbtgr,int nbtpr)
   {
+    nom="Tore";
+    int b=1;
+    show= &b;
     GLfloat theta, phi;
     theta = ((GLfloat)radians(360.f))/((GLfloat)nbtgr);
     phi = ((GLfloat)(radians(360.f)))/((GLfloat)nbtpr);

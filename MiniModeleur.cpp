@@ -36,7 +36,10 @@ void reshape(int,int);
 void drawString(const char *str, int x, int y, float color[4], void *font);
 void showInfo();
 void interface();
+void ajouterPrimtv();
 
+void afficherArbre(GLUI *panneDroit);
+void afficheAjout(GLUI* panneGauche);
 void *font = GLUT_BITMAP_8_BY_13; // pour afficher des textes 2D sur l'ecran
 // variables globales pour OpenGL
 bool mouseLeftDown;
@@ -47,7 +50,8 @@ float cameraAngleX;
 float cameraAngleY;
 float cameraDistance=0.;
 float aspectRatio;
-
+int complexiter1,complexiter2;
+GLfloat ToreRayon=1,Torerayon=0.1;
 // variables Handle d'opengl 
 //--------------------------
 GLuint programID;   // handle pour le shader
@@ -88,14 +92,27 @@ int screenHeight = 500;
 int screenWidth = 500;
 
 
-//interface graphique//
+//interface graphique variables//
 int main_window;
 GLUI *panneDroit, *panneGauche, *panneBas;
+GLUI_RadioGroup* courantPrimtv;
+GLUI_Spinner *ToreR,*Torer,*Complexiter1,*Complexiter2;
+
+
+
+
+
 
 Tore t;
 Tore montore;
 Arbre a;
 int nbPrimtv=0;
+
+
+ GLUI_Rollout *arbre ,*ajout;
+ 
+ int primtvCourant; 
+ int nbPrivDiff=1;
 
 
 //----------------------------------------
@@ -188,11 +205,11 @@ void affichage()
      Model = glm::rotate(Model,glm::radians(cameraAngleY),glm::vec3(0, 1, 0) );
      Model = glm::scale(Model,glm::vec3(.5, .5, .5));
      
-     for(int i=0 ;i<nbPrimtv;i++)
+     for(int i=0 ;i<a.getTaille();i++)
       {
         Primtv p=a.getPrimtv(i);
               genereVBO(p);
-       cout <<glm::to_string(p.getmodel())<<endl;
+      // cout <<glm::to_string(p.getmodel())<<endl;
       MVP = Projection * View* (Model*p.getmodel());
               traceObjet(p); 
           
@@ -380,32 +397,97 @@ void mouseMotion(int x, int y)
 }
 
 
-void interface()
+
+
+
+
+
+        void ajouterPrimtv(int i)
+        {
+          cout <<i<<endl;
+         if(i==0)
+         {
+          Tore t;
+          t.init(ToreRayon,Torerayon,40,60);
+           a.addPrimtv(t);
+         }
+         panneDroit->close();
+
+  
+     interface();
+             }
+   
+     
+
+        void afficherArbre(GLUI *parentremove)
+
+        {
+           Complexiter1  =new GLUI_Spinner( parentremove, "",&complexiter1);
+          Complexiter1->set_int_limits(10,200);
+            Complexiter1  =new GLUI_Spinner( parentremove, "",&complexiter1);
+          Complexiter1->set_int_limits(10,200);
+         arbre=new GLUI_Rollout(parentremove, "Arbre", true );
+
+         
+         for(int i=0;i<a.getTaille();i++)
+         {     
+                 new GLUI_Checkbox( arbre,a.getPrimtv(i).nom.c_str(),a.getPrimtv(i).show);
+                // new GLUI_StaticText( arbre, "" );
+         }
+        
+         new GLUI_Column( arbre, true );
+        courantPrimtv= new GLUI_RadioGroup(arbre,&primtvCourant);
+     
+         for(int i=0;i<a.getTaille();i++)
+         {           
+                
+          new GLUI_RadioButton(courantPrimtv,"");
+         }
+        new GLUI_Column( arbre, true );
+        
+
+         for(int i=0;i<a.getTaille();i++)
+         {           
+        
+         new GLUI_Button(arbre, "Sup");
+         }
+       
+
+}
+
+void afficheAjout(GLUI *parentAdd)
 {
 
-    //////////////////////////PANNE DROIT////////////////////////////
+    ajout=new GLUI_Rollout(parentAdd, "AjouterPrimitives", true );
+
+        for (int i=0;i< nbPrivDiff;i++)
+        {
+         if(i==0)
+         {
+          ToreR  =new GLUI_Spinner( ajout, "Grand rayon:",&ToreRayon);
+          ToreR->set_float_limits(0.3,1000);
+          Torer  =new GLUI_Spinner( ajout, "Petit rayon:",&Torerayon);
+          Torer->set_float_limits(0.1,990);
+          new GLUI_Button(ajout, "Ajouter un tore", i, ajouterPrimtv );
+
+         }
+        
+        }
+}
+
+void interface()
+{
+  GLUI_Master.close_all();
+   
     panneDroit= GLUI_Master.create_glui_subwindow( main_window, GLUI_SUBWINDOW_RIGHT );
-    panneDroit->set_main_gfx_window( main_window );
-
-
-    //////////////////////////PANNE Gauche////////////////////////////
     panneGauche= GLUI_Master.create_glui_subwindow( main_window, GLUI_SUBWINDOW_LEFT );
-    panneGauche->set_main_gfx_window( main_window );
-
-    //////////////////////////PANNE Bas////////////////////////////
     panneBas= GLUI_Master.create_glui_subwindow( main_window, GLUI_SUBWINDOW_BOTTOM );
+  
+     afficherArbre(panneDroit);
+     afficheAjout(panneGauche);
+    panneDroit->set_main_gfx_window( main_window );
+    panneGauche->set_main_gfx_window( main_window );
     panneBas->set_main_gfx_window( main_window );
-
-
-    glutDisplayFunc(affichage);
-    GLUI_Master.set_glutReshapeFunc( reshape );  
-    GLUI_Master.set_glutKeyboardFunc( clavier );
-    GLUI_Master.set_glutSpecialFunc( NULL );
-    GLUI_Master.set_glutMouseFunc( mouse );
-    glutMotionFunc( mouseMotion );
-
-
-
 }
 
 
@@ -416,7 +498,14 @@ int main(int argc,char **argv)
   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE|GLUT_RGB);
   glutInitWindowPosition(200,200);
   glutInitWindowSize(screenWidth,screenHeight);
-   main_window=glutCreateWindow("Mini Modeleur");
+  main_window=glutCreateWindow("Mini Modeleur");
+
+  glutDisplayFunc(affichage);
+    GLUI_Master.set_glutReshapeFunc( reshape );  
+    GLUI_Master.set_glutKeyboardFunc( clavier );
+    GLUI_Master.set_glutSpecialFunc( NULL );
+    GLUI_Master.set_glutMouseFunc( mouse );
+    glutMotionFunc( mouseMotion );
 // Initialize GLEW
 	if (glewInit() != GLEW_OK) {
 		fprintf(stderr, "Failed to initialize GLEW\n");
@@ -443,12 +532,18 @@ montore.roter(130,vec3(0,1,0));
 
 
 a.addPrimtv(montore);
-
+/*
 t.init(2,.1,40,20);
 
+for(int i=0;i<10;i++)
+{
+  t.roter((float)i*2,vec3(1,0,0));
 a.addPrimtv(t);
+}
+*/
 nbPrimtv=a.getTaille();
 interface();
+
  
   /* Entree dans la boucle principale glut */
   glutMainLoop();

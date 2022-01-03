@@ -1,4 +1,5 @@
 #include "Primtv.h"
+
 using namespace std;
 using namespace glm;
 
@@ -9,7 +10,7 @@ using namespace glm;
             
         }
 
-
+  
         vector<Sommet> Primtv::getPositions()
         {
             return positions;
@@ -83,12 +84,11 @@ using namespace glm;
         {
              rotmodel=rotate(rotmodel,glm::radians(angle),rotmat);
 
-        
         }
 
-           mat4 Primtv::getmodel()
-           {
+        mat4 Primtv::getmodel()
+        {
 
 
-               return scamodel*transmodel*rotmodel ;
-           }
+            return scamodel*transmodel*rotmodel ;
+        }

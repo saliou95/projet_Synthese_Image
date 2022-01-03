@@ -4,6 +4,7 @@
 #include <iostream>
 #include <math.h>
 #include <cstdlib>
+#include <cstring>
 #include <stdlib.h>
 #include <stdio.h>
 #include <vector>
@@ -22,17 +23,16 @@ class Arbre
            void addPrimtv(Primtv p);
           
            void removePrimtv (int i); 
-          
-           void afficherArbre();
-           
+         
+       
            void afficherLesPrimtv();
-           
-           
+     
+              
+         
            
     protected:
              std::vector<Primtv> lesPrimitives;
-
-             
+            
        
            
                  

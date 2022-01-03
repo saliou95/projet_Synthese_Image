@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <vector>
+#include <string>
+#include <GL/glui.h>
 #include "../glm/glm.hpp"
 #include "../glm/gtc/matrix_transform.hpp"
 typedef struct {
@@ -43,6 +45,7 @@ class Primtv
            std::vector<Face> getFaces();
            std::vector<Normale> getNormales();
            glm::mat4 getmodel();
+       
            void afficher();
            void addSommet(Sommet s);
            void addFace(Face f);
@@ -59,6 +62,10 @@ class Primtv
              glm::mat4 rotmodel=glm::mat4(1.0f);
              glm::mat4 transmodel=glm::mat4(1.0f);
              glm::mat4 scamodel=glm::mat4(1.0f);
+    public:
+             int* show;
+             std::string nom;
+             int ID;
             
 };
 

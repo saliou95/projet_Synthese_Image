@@ -26,5 +26,5 @@ float angledif=dot(dirdif,fragNormale);
 difuse=vec4(light.intensities,1.0)*light.attenuation*max(angledif,0)  ;
 ambient=vec4(light.intensities,1.0)*light.ambientCoefficient;
 
-finalColor=color*(ambient +difuse);
+finalColor=color;//*(ambient +difuse);
 }
