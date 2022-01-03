@@ -53,6 +53,7 @@ class Primtv
            void miaech(glm::vec3 scamat );
            void translater(glm::vec3 transvect );
            void roter(float angle,glm::vec3 rotmat );
+           void Changeshow();
     protected:
              std::vector<Sommet> positions;
              std::vector<Face> faces;
@@ -63,7 +64,7 @@ class Primtv
              glm::mat4 transmodel=glm::mat4(1.0f);
              glm::mat4 scamodel=glm::mat4(1.0f);
     public:
-             int* show;
+             int show=0;
              std::string nom;
              int ID;
             

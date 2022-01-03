@@ -79,7 +79,7 @@ using namespace glm;
         
         }
 
-
+    
         void Primtv::roter(float angle,glm::vec3 rotmat )
         {
              rotmodel=rotate(rotmodel,glm::radians(angle),rotmat);

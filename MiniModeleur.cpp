@@ -50,7 +50,7 @@ float cameraAngleX;
 float cameraAngleY;
 float cameraDistance=0.;
 float aspectRatio;
-int complexiter1,complexiter2;
+int complexiter1=10,complexiter2=10;
 GLfloat ToreRayon=1,Torerayon=0.1;
 // variables Handle d'opengl 
 //--------------------------
@@ -103,7 +103,7 @@ GLUI_Spinner *ToreR,*Torer,*Complexiter1,*Complexiter2;
 
 
 
-Tore t;
+
 Tore montore;
 Arbre a;
 int nbPrimtv=0;
@@ -113,7 +113,7 @@ int nbPrimtv=0;
  
  int primtvCourant; 
  int nbPrivDiff=1;
-
+ int show;
 
 //----------------------------------------
 void initOpenGL(void)
@@ -208,11 +208,14 @@ void affichage()
      for(int i=0 ;i<a.getTaille();i++)
       {
         Primtv p=a.getPrimtv(i);
+        
+       if(p.show==1)
+       {
               genereVBO(p);
       // cout <<glm::to_string(p.getmodel())<<endl;
       MVP = Projection * View* (Model*p.getmodel());
               traceObjet(p); 
-          
+       }
           
       }      
           // trace VBO avec ou sans shader
@@ -404,12 +407,12 @@ void mouseMotion(int x, int y)
 
         void ajouterPrimtv(int i)
         {
-          cout <<i<<endl;
+         // cout <<i<<endl;
          if(i==0)
          {
-          Tore t;
-          t.init(ToreRayon,Torerayon,40,60);
-           a.addPrimtv(t);
+          Tore tore;
+          tore.init(ToreRayon,Torerayon,complexiter1,complexiter1);
+           a.addPrimtv(tore);
          }
          panneDroit->close();
 
@@ -418,26 +421,34 @@ void mouseMotion(int x, int y)
              }
    
      
-
+       void defineshow(int i)
+       {
+              a.Changeshow(i);
+              //cout<< a.getPrimtv(i).show<<endl;
+       }
         void afficherArbre(GLUI *parentremove)
 
         {
+          show=0;
+          a.reshape();
            Complexiter1  =new GLUI_Spinner( parentremove, "",&complexiter1);
           Complexiter1->set_int_limits(10,200);
-            Complexiter1  =new GLUI_Spinner( parentremove, "",&complexiter1);
-          Complexiter1->set_int_limits(10,200);
+            Complexiter2  =new GLUI_Spinner( parentremove, "",&complexiter2);
+          Complexiter2->set_int_limits(10,200);
          arbre=new GLUI_Rollout(parentremove, "Arbre", true );
 
          
          for(int i=0;i<a.getTaille();i++)
          {     
-                 new GLUI_Checkbox( arbre,a.getPrimtv(i).nom.c_str(),a.getPrimtv(i).show);
+                 new GLUI_Checkbox( arbre,a.getPrimtv(i).nom.c_str(),&show,i,defineshow);
                 // new GLUI_StaticText( arbre, "" );
          }
         
          new GLUI_Column( arbre, true );
         courantPrimtv= new GLUI_RadioGroup(arbre,&primtvCourant);
      
+             new GLUI_RadioButton(courantPrimtv,"ALL");
+           
          for(int i=0;i<a.getTaille();i++)
          {           
                 
@@ -524,7 +535,7 @@ std::cout << "***** Info GPU *****" << std::endl;
 
 
 
-montore.init(1.,.3,40,20);
+montore.init(1.,.3,complexiter1,complexiter2);
 montore.translater(vec3(1,0,0));
 montore.translater(vec3(-2,0,0));
 montore.roter(90,vec3(1,0,0));
@@ -532,15 +543,9 @@ montore.roter(130,vec3(0,1,0));
 
 
 a.addPrimtv(montore);
-/*
-t.init(2,.1,40,20);
 
-for(int i=0;i<10;i++)
-{
-  t.roter((float)i*2,vec3(1,0,0));
-a.addPrimtv(t);
-}
-*/
+
+
 nbPrimtv=a.getTaille();
 interface();
 
