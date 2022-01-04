@@ -31,7 +31,8 @@ class Arbre
            void afficherLesPrimtv();
            
            void translater(glm::vec3,int i);
-              
+       
+           void roter(float angle,glm::vec3 rotmat,int i );
          
            
     protected:

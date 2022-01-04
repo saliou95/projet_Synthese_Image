@@ -2,9 +2,6 @@
 uniform struct Light {vec3 position ; vec3 intensities; float ambientCoefficient;float attenuation ;} light;
 
 
-
-
-
 uniform vec3 cameraPosition;
 
 uniform sampler2D myTextureSampler;

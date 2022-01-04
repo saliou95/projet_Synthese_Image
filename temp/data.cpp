@@ -503,13 +503,14 @@ new GLUI_RadioButton(SS,"2");
     new GLUI_Translation(glui2, "Objects XY", GLUI_TRANSLATION_XY, obj_pos );
   trans_xy->set_speed( .00000000000005 );
   new GLUI_Column( glui2, false );
-  GLUI_Translation *trans_x = 
+
     new GLUI_Translation(glui2, "Objects X", GLUI_TRANSLATION_X, obj_pos );
-  trans_x->set_speed( .005 );
+
   new GLUI_Column( glui2, false );
   GLUI_Translation *trans_y = 
     new GLUI_Translation( glui2, "Objects Y", GLUI_TRANSLATION_Y, &obj_pos[1] );
   trans_y->set_speed( .005 );
+  trans_x->
   new GLUI_Column( glui2, false );
   GLUI_Translation *trans_z = 
     new GLUI_Translation( glui2, "Objects Z", GLUI_TRANSLATION_Z, &obj_pos[2] );

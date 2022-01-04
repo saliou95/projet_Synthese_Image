@@ -41,11 +41,16 @@ using namespace glm;
             else
                 lesPrimitives[i].show=1;
         }
-    void Arbre::translater(vec3 vec,int i)
-    {
-      lesPrimitives[i].translater(vec);
+        void Arbre::translater(vec3 vec,int i)
+        {
+          lesPrimitives[i].translater(vec);
 
-    }    
+        }   
+        void Arbre::roter(float angle,glm::vec3 rotmat,int i) 
+        {
+
+          lesPrimitives[i].roter(angle,rotmat);
+        }
       
         void Arbre::afficherLesPrimtv()
         {

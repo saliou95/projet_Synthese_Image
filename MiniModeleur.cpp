@@ -99,6 +99,7 @@ GLUI_Rollout *arbre ,*ajout;
 GLUI_RadioGroup* courantPrimtv;
 GLUI_Spinner *ToreR,*Torer,*Complexiter1,*Complexiter2;
 GLUI_Translation *trans_x,*trans_y,*trans_z;
+GLUI_Scrollbar *rotx,*roty,*rotz;
  
  int primtvCourant; 
  int nbPrivDiff=1;
@@ -106,8 +107,8 @@ GLUI_Translation *trans_x,*trans_y,*trans_z;
  GLfloat transx=0, transy=0, transz=0;
  GLfloat vittessetrans=0.0005;
  vec3 traansAll;
-
-Arbre a;
+ GLfloat rotationx=0,rotationy=0,rotationz=0;
+ Arbre a;
 int nbPrimtv=0;
 Tore montore;
 
@@ -439,22 +440,47 @@ void mouseMotion(int x, int y)
 
       void transformations(int i)
       {
-        if(primtvCourant==0)
-          for(int j=0 ;j<a.getTaille();j++)
-            a.translater(vec3(vittessetrans*transx,vittessetrans*transy,-vittessetrans*transz),j);
-        
-        
-        else
+        if(i==1)
+        {
+          if(primtvCourant==0)
+            for(int j=0 ;j<a.getTaille();j++)
+              a.translater(vec3(vittessetrans*transx,vittessetrans*transy,-vittessetrans*transz),j);
+          
+          
+          else
+              a.translater(vec3(vittessetrans*transx,vittessetrans*transy,-vittessetrans*transz),primtvCourant-1);
+          trans_x->set_x(0.0);
+          trans_y->set_y(0.0);
+          trans_z->set_z(0.0);
+          transx=0;
+          transy=0;
+          transz=0;
+        }
+        if(i==2)
+        {
+          if(primtvCourant==0)
+            for(int j=0 ;j<a.getTaille();j++)
+            {
+              a.roter(rotationx,vec3(1,0,0),j);
+              a.roter(rotationy,vec3(0,1,0),j);
+              a.roter(rotationz,vec3(0,0,1),j);
+            }
+          else
+          {
+              a.roter(rotationx,vec3(1,0,0),primtvCourant-1);
+              a.roter(rotationy,vec3(0,1,0),primtvCourant-1);
+              a.roter(rotationz,vec3(0,0,1),primtvCourant-1);
+          }
+          rotx->set_float_val(0);
+          roty->set_float_val(0);
+          rotz->set_float_val(0);
+          rotationx=0;
+          rotationy=0;
+          rotationz=0;
+          
+        }
 
-            a.translater(vec3(vittessetrans*transx,vittessetrans*transy,-vittessetrans*transz),primtvCourant-1);
-       
-
-      trans_x->set_x(0.0);
-      trans_y->set_y(0.0);
-      trans_z->set_z(0.0);
-       transx=0;
-       transy=0;
-       transz=0;
+ 
       
       }
 
@@ -522,10 +548,21 @@ GLUI_Spinner *vittesse  =new GLUI_Spinner( panneBas, "Vittesse de transformation
         new GLUI_Column( panneBas, false );
 trans_x = new GLUI_Translation(panneBas, "Translation X", GLUI_TRANSLATION_X,&transx,1,transformations );
         new GLUI_Column( panneBas, false );
-trans_y = new GLUI_Translation(panneBas, "Translation Y", GLUI_TRANSLATION_Y,&transy,2,transformations );
+trans_y = new GLUI_Translation(panneBas, "Translation Y", GLUI_TRANSLATION_Y,&transy,1,transformations );
  new GLUI_Column( panneBas, false );
-trans_z = new GLUI_Translation(panneBas, "Translation Z", GLUI_TRANSLATION_Z,&transz,3,transformations );
+trans_z = new GLUI_Translation(panneBas, "Translation Z", GLUI_TRANSLATION_Z,&transz,1,transformations );
  
+ new GLUI_Column( panneBas, false );
+rotx= new GLUI_Scrollbar(panneBas, " rotationx",GLUI_SCROLL_HORIZONTAL,&rotationx,2,transformations );
+rotx->set_float_limits(-360.,360.);
+
+roty= new GLUI_Scrollbar(panneBas, " rotationy",GLUI_SCROLL_HORIZONTAL,&rotationy,2,transformations );
+roty->set_float_limits(-360.,360.);
+
+rotz= new GLUI_Scrollbar(panneBas, " rotationz",GLUI_SCROLL_HORIZONTAL,&rotationz,2,transformations );
+rotz->set_float_limits(-360.,360.);
+
+
 }
 
 void interface()
