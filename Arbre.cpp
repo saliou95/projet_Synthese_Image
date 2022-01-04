@@ -1,5 +1,6 @@
 #include "Arbre.h"
-
+using namespace std;
+using namespace glm;
         Arbre::Arbre()
         {
 
@@ -21,18 +22,11 @@
          lesPrimitives.push_back(p);
         }
 
-        void Arbre::Changeshow(int i)
-        {
-            if(lesPrimitives[i].show==1)
-                lesPrimitives[i].show=0;
-            else
-                lesPrimitives[i].show=1;
-        }
-
         void Arbre::removePrimtv(int i)
         {
           lesPrimitives.erase(lesPrimitives.begin()+i);
         }
+
 
         void Arbre:: removeAll()
         {
@@ -40,7 +34,18 @@
 
         } 
 
+    void Arbre::Changeshow(int i)
+        {
+            if(lesPrimitives[i].show==1)
+                lesPrimitives[i].show=0;
+            else
+                lesPrimitives[i].show=1;
+        }
+    void Arbre::translater(vec3 vec,int i)
+    {
+      lesPrimitives[i].translater(vec);
 
+    }    
       
         void Arbre::afficherLesPrimtv()
         {

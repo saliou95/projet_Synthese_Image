@@ -29,7 +29,8 @@ class Arbre
            void Changeshow(int i);
 
            void afficherLesPrimtv();
-  
+           
+           void translater(glm::vec3,int i);
               
          
            

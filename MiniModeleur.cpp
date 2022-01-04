@@ -14,7 +14,6 @@
 #include "Primtv.h"
 #include "Tore.h"
 #include "Arbre.h"
-
 #include <GL/glui.h>
 #include "../glm/glm.hpp"
 #include "../glm/gtc/matrix_transform.hpp"
@@ -40,6 +39,7 @@ void ajouterPrimtv();
 
 void afficherArbre(GLUI *panneDroit);
 void afficheAjout(GLUI* panneGauche);
+void afficheTransformations(GLUI* panneBas);
 void *font = GLUT_BITMAP_8_BY_13; // pour afficher des textes 2D sur l'ecran
 // variables globales pour OpenGL
 bool mouseLeftDown;
@@ -95,25 +95,24 @@ int screenWidth = 500;
 //interface graphique variables//
 int main_window;
 GLUI *panneDroit, *panneGauche, *panneBas;
+GLUI_Rollout *arbre ,*ajout;
 GLUI_RadioGroup* courantPrimtv;
 GLUI_Spinner *ToreR,*Torer,*Complexiter1,*Complexiter2;
-
-
-
-
-
-
-
-Tore montore;
-Arbre a;
-int nbPrimtv=0;
-
-
- GLUI_Rollout *arbre ,*ajout;
+GLUI_Translation *trans_x,*trans_y,*trans_z;
  
  int primtvCourant; 
  int nbPrivDiff=1;
  int show;
+ GLfloat transx=0, transy=0, transz=0;
+ GLfloat vittessetrans=0.0005;
+ vec3 traansAll;
+
+Arbre a;
+int nbPrimtv=0;
+Tore montore;
+
+ 
+
 
 //----------------------------------------
 void initOpenGL(void)
@@ -204,7 +203,8 @@ void affichage()
      Model = glm::rotate(Model,glm::radians(cameraAngleX),glm::vec3(1, 0, 0) );
      Model = glm::rotate(Model,glm::radians(cameraAngleY),glm::vec3(0, 1, 0) );
      Model = glm::scale(Model,glm::vec3(.5, .5, .5));
-     
+     //cout <<transx<<endl;
+
      for(int i=0 ;i<a.getTaille();i++)
       {
         Primtv p=a.getPrimtv(i);
@@ -411,7 +411,7 @@ void mouseMotion(int x, int y)
          if(i==0)
          {
           Tore tore;
-          tore.init(ToreRayon,Torerayon,complexiter1,complexiter1);
+          tore.init(ToreRayon,Torerayon,complexiter1,complexiter2);
            a.addPrimtv(tore);
          }
          panneDroit->close();
@@ -437,12 +437,31 @@ void mouseMotion(int x, int y)
         interface();
       }
 
+      void transformations(int i)
+      {
+        if(primtvCourant==0)
+          for(int j=0 ;j<a.getTaille();j++)
+            a.translater(vec3(vittessetrans*transx,vittessetrans*transy,-vittessetrans*transz),j);
+        
+        
+        else
+
+            a.translater(vec3(vittessetrans*transx,vittessetrans*transy,-vittessetrans*transz),primtvCourant-1);
+       
+
+      trans_x->set_x(0.0);
+      trans_y->set_y(0.0);
+      trans_z->set_z(0.0);
+       transx=0;
+       transy=0;
+       transz=0;
+      
+      }
+
       void afficherArbre(GLUI *parentremove)
 
         {
-         
-        
-          
+             
          arbre=new GLUI_Rollout(parentremove, "Arbre", true );
 
          
@@ -475,7 +494,7 @@ void afficheAjout(GLUI *parentAdd)
 {
 
 
-        Complexiter1  =new GLUI_Spinner( parentAdd, "",&complexiter1);
+        Complexiter1  =new GLUI_Spinner( parentAdd, "ComplexiterVert",&complexiter1);
         Complexiter1->set_int_limits(10,200);
         Complexiter2  =new GLUI_Spinner( parentAdd, "",&complexiter2);
         Complexiter2->set_int_limits(10,200);
@@ -496,6 +515,19 @@ void afficheAjout(GLUI *parentAdd)
         }
 }
 
+void afficheTransformations(GLUI* panneBas)
+{
+GLUI_Spinner *vittesse  =new GLUI_Spinner( panneBas, "Vittesse de transformation:",&vittessetrans);
+          vittesse->set_float_limits(0.00001,0.1);
+        new GLUI_Column( panneBas, false );
+trans_x = new GLUI_Translation(panneBas, "Translation X", GLUI_TRANSLATION_X,&transx,1,transformations );
+        new GLUI_Column( panneBas, false );
+trans_y = new GLUI_Translation(panneBas, "Translation Y", GLUI_TRANSLATION_Y,&transy,2,transformations );
+ new GLUI_Column( panneBas, false );
+trans_z = new GLUI_Translation(panneBas, "Translation Z", GLUI_TRANSLATION_Z,&transz,3,transformations );
+ 
+}
+
 void interface()
 {
   GLUI_Master.close_all();
@@ -506,6 +538,7 @@ void interface()
   
      afficherArbre(panneDroit);
      afficheAjout(panneGauche);
+     afficheTransformations(panneBas);
     panneDroit->set_main_gfx_window( main_window );
     panneGauche->set_main_gfx_window( main_window );
     panneBas->set_main_gfx_window( main_window );
