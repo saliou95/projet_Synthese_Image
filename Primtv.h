@@ -66,7 +66,7 @@ class Primtv
     public:
              int show=1;
              std::string nom;
-             int ID;
+        
             
 };
 

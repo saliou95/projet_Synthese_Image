@@ -7,6 +7,8 @@ using namespace glm;
 
   void Sphere::init(GLfloat rayon,int pas) // pour tester prendre par exemple rayon = 1, pas= 50 et sectors = 50
   {
+     nom="Sphere";
+
     float p =((GLfloat)radians(360.f))/(float)(pas);
     float S = ((GLfloat)radians(180.f))/(float)(pas);
     Sommet sommet;

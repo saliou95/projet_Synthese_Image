@@ -13,6 +13,7 @@
 #include "shader.hpp"
 #include <string.h>
 #include "Primtv.h"
+#include "Groupe.h"
 #include "Tore.h"
 #include "Sphere.h"
 #include "Arbre.h"
@@ -98,13 +99,13 @@ int screenWidth = 500;
 //interface graphique variables//
 int main_window;
 GLUI *panneDroit, *panneGauche, *panneBas;
-GLUI_Rollout *arbre ,*ajout;
-GLUI_RadioGroup* courantPrimtv;
+GLUI_Rollout *arbre ,*ajout,*groupe,*primtvs;
+GLUI_RadioGroup* courantPrimtv,*courantGroupe;
 GLUI_Spinner *ToreR,*Torer,*Complexiter1,*Complexiter2, *SphereR, *SphereP, *SphereS;
 GLUI_Translation *trans_x,*trans_y,*trans_z;
 GLUI_Scrollbar *rotx,*roty,*rotz;
 GLUI_Spinner *scalex, *scaley,*scalez;
- int primtvCourant; 
+ int primtvCourant,groupeCourant=0; 
  int nbPrivDiff=2;
  int show;
  GLfloat scalx=1,scaly=1,scalz=1;
@@ -113,9 +114,10 @@ GLUI_Spinner *scalex, *scaley,*scalez;
  vec3 traansAll;
  GLfloat rotationx=0,rotationy=0,rotationz=0;
  Arbre a;
+
+
  int nbPrimtv=0;
- Tore montore;
- Sphere monSphere;
+
 
  
 
@@ -187,6 +189,7 @@ void deleteVBO ()
         glDeleteBuffers(1, &VAO);
 }
 
+
 /* fonction d'affichage */
 void affichage()
 {
@@ -211,19 +214,30 @@ void affichage()
      Model = glm::scale(Model,glm::vec3(.5, .5, .5));
      //cout <<transx<<endl;
 
-     for(int i=0 ;i<a.getTaille();i++)
+       for(int i=0 ;i<a.getTaille();i++)
       {
-        Primtv p=a.getPrimtv(i);
+        Groupe p=a.getGroupe(i);
         
        if(p.show==1)
        {
-              genereVBO(p);
-      // cout <<glm::to_string(p.getmodel())<<endl;
-      MVP = Projection * View* (Model*p.getmodel());
-              traceObjet(p); 
+
+         for(int j=0;j<p.getTaille();j++)
+         {
+
+           Primtv pp=p.getPrimtv(j);
+           if(pp.show==1)
+           {
+              genereVBO(pp);
+            cout<<"trace"<<pp.nom<<endl;
+              MVP = Projection * View* (Model*p.getmodel()*pp.getmodel());
+              traceObjet(pp); 
+           }
+         }
+       
        }
           
-      }      
+      }
+
           // trace VBO avec ou sans shader
 
     //Model = glm::translate(Model,glm::vec3(0,0,cameraDistance));
@@ -418,12 +432,12 @@ void mouseMotion(int x, int y)
          {
           Tore tore;
           tore.init(ToreRayon,Torerayon,complexiter1,complexiter2);
-           a.addPrimtv(tore);
+           a.addPrimtv(tore,groupeCourant);
          }
         else if(i==1) {
           Sphere sphere;
           sphere.init(SphereRayon,SpherePas);
-           a.addPrimtv(sphere);
+           a.addPrimtv(sphere,groupeCourant);
          }
          panneDroit->close();
 
@@ -438,13 +452,26 @@ void mouseMotion(int x, int y)
               //cout<< a.getPrimtv(i).show<<endl;
               
        }
+       void defineshowPrimtv(int j)
+       {
+              a.ChangeshowPrimtv(groupeCourant,j);
+              //cout<< a.getPrimtv(i).show<<endl;
+              
+       }
 
-      void supprimerPrimtv(int i)
+      void supprimer(int j)
       {
         if(primtvCourant==0)
-        a.removeAll();
+        a.removeAllPrimtiv(groupeCourant);
         else
-        a.removePrimtv(primtvCourant-1);
+        a.removePrimtv(groupeCourant,primtvCourant-1);
+        interface();
+      }
+
+void supprimerg(int j)
+      {
+       a.removeGroupe(groupeCourant);
+       groupeCourant=0;
         interface();
       }
 
@@ -452,13 +479,15 @@ void mouseMotion(int x, int y)
       {
         if(i==1)
         {
-          if(primtvCourant==0)
-            for(int j=0 ;j<a.getTaille();j++)
-              a.translater(vec3(vittessetrans*transx,vittessetrans*transy,-vittessetrans*transz),j);
+            if(primtvCourant==0)
+              for(int i=0 ;i<a.getGroupe(groupeCourant).getTaille();i++)
+                  a.translaterg(vec3(vittessetrans*transx,vittessetrans*transy,-vittessetrans*transz),groupeCourant);
           
-          
-          else
-              a.translater(vec3(vittessetrans*transx,vittessetrans*transy,-vittessetrans*transz),primtvCourant-1);
+            else
+            {
+            
+                a.translater(vec3(vittessetrans*transx,vittessetrans*transy,-vittessetrans*transz),groupeCourant,primtvCourant-1);
+            }
           trans_x->set_x(0.0);
           trans_y->set_y(0.0);
           trans_z->set_z(0.0);
@@ -468,37 +497,35 @@ void mouseMotion(int x, int y)
         }
         if(i==2)
         {
-          if(primtvCourant==0)
-            for(int j=0 ;j<a.getTaille();j++)
-            {
-              a.roter(rotationx,vec3(1,0,0),j);
-              a.roter(rotationy,vec3(0,1,0),j);
-              a.roter(rotationz,vec3(0,0,1),j);
-            }
-          else
-          {
-              a.roter(rotationx,vec3(1,0,0),primtvCourant-1);
-              a.roter(rotationy,vec3(0,1,0),primtvCourant-1);
-              a.roter(rotationz,vec3(0,0,1),primtvCourant-1);
-          }
-          rotx->set_float_val(0);
-          roty->set_float_val(0);
-          rotz->set_float_val(0);
-          rotationx=0;
-          rotationy=0;
-          rotationz=0;
-          
-        }
+             if(primtvCourant==0)
+                {
+                      a.roterg(rotationx,vec3(1,0,0),groupeCourant);
+                      a.roterg(rotationy,vec3(0,1,0),groupeCourant);
+                      a.roterg(rotationz,vec3(0,0,1),groupeCourant);
+                }
+                  
+              else
+                  {
+                      a.roter(rotationx,vec3(1,0,0),groupeCourant,primtvCourant-1);
+                      a.roter(rotationy,vec3(0,1,0),groupeCourant,primtvCourant-1);
+                      a.roter(rotationz,vec3(0,0,1),groupeCourant,primtvCourant-1);
+                  }
+        rotx->set_float_val(0);
+        roty->set_float_val(0);
+        rotz->set_float_val(0);
+        rotationx=0;
+        rotationy=0;
+        rotationz=0;
+        
+              }
 
          if(i==3)
         {
           if(primtvCourant==0)
-            for(int j=0 ;j<a.getTaille();j++)
-              a.scaler(vec3(scalx,scaly,scalz),j);
-          
-          
-          else
-              a.translater(vec3(scalx,scaly,scalz),primtvCourant-1);
+           for(int i=0 ;i<a.getGroupe(groupeCourant).getTaille();i++)
+              a.scalerg(vec3(scalx,scaly,scalz),groupeCourant);
+              else
+              a.scaler(vec3(scalx,scaly,scalz),groupeCourant,primtvCourant-1);
           scalex->set_float_val(1.0);
           scaley->set_float_val(1.0);
           scalez->set_float_val(1.0);
@@ -510,37 +537,71 @@ void mouseMotion(int x, int y)
  
       
       }
-
+ void radiochange(int i)
+ {
+   interface()
+; }
       void afficherArbre(GLUI *parentremove)
 
         {
-             
-         arbre=new GLUI_Rollout(parentremove, "Arbre", true );
-
-         
-         for(int i=0;i<a.getTaille();i++)
-         {     
-            show=a.getPrimtv(i).show;
-                 new GLUI_Checkbox( arbre,a.getPrimtv(i).nom.c_str(),&show,i,defineshow);
-                // new GLUI_StaticText( arbre, "" );
-         }
-          new GLUI_StaticText( arbre, "" );
-        new GLUI_Button(arbre, "Modifier");
-         new GLUI_Column( arbre, true );
-        courantPrimtv= new GLUI_RadioGroup(arbre,&primtvCourant);
-     
-             new GLUI_RadioButton(courantPrimtv,"ALL");
+            arbre=new GLUI_Rollout(parentremove, "Arbres", true );
+          
+            groupe=new GLUI_Rollout(arbre, "Groupes", true );
            
-         for(int i=0;i<a.getTaille();i++)
-         {           
-                
-          new GLUI_RadioButton(courantPrimtv,"");
-         }
-      //  new GLUI_Column( arbre, true );
+            for(int i=0;i<a.getTaille();i++)
+            {     
+                show=a.getGroupe(i).show;
+                    new GLUI_Checkbox( groupe,a.getGroupe(i).nom.c_str(),&show,i,defineshow);
+                    // new GLUI_StaticText( arbre, "" );
+            }
+            
+              new GLUI_StaticText( groupe, "" );
         
+            new GLUI_Column( groupe, true );
+            courantGroupe= new GLUI_RadioGroup(groupe,&groupeCourant,-1,radiochange);
+        
+               
+              
+            for(int i=0;i<a.getTaille();i++)
+            {           
+                    
+              new GLUI_RadioButton(courantGroupe,"");
+            }
+          //  new GLUI_Column( arbre, true );
+           if(a.getTaille()>1)
+            new GLUI_Button(groupe, "Supprimer",-1,supprimerg);
 
-         new GLUI_Button(arbre, "Supprimer",-1,supprimerPrimtv);
+
+
+ 
+           primtvs=new GLUI_Rollout(arbre, "Primitives du groupe", true );
          
+          
+           for(int i=0;i<a.getGroupe(groupeCourant).getTaille();i++)
+            {     
+                show=a.getGroupe(groupeCourant).getPrimtv(i).show;
+                new GLUI_Checkbox( primtvs,a.getGroupe(groupeCourant).getPrimtv(i).nom.c_str(),&show,i,defineshowPrimtv);
+                    // new GLUI_StaticText( arbre, "" );
+            }
+              new GLUI_StaticText( primtvs, "" );
+          
+         
+            new GLUI_Column( primtvs, true );
+            courantPrimtv= new GLUI_RadioGroup(primtvs,&primtvCourant);
+       
+                new GLUI_RadioButton(courantPrimtv,"ALL");
+              
+         for(int i=0;i<a.getGroupe(groupeCourant).getTaille();i++)
+            {           
+                    
+              new GLUI_RadioButton(courantPrimtv,"");
+            }
+             
+              new GLUI_Column( arbre, true );
+            
+            new GLUI_Button(primtvs, "Supprimer",-1,supprimer);
+          
+           
 }
 
 void afficheAjout(GLUI *parentAdd)
@@ -657,6 +718,15 @@ std::cout << "***** Info GPU *****" << std::endl;
     std::cout << "Version GLSL : " << glGetString (GL_SHADING_LANGUAGE_VERSION) << std::endl << std::endl;
 
 	initOpenGL(); 
+  Groupe g;
+  Tore t;
+  Sphere s;
+    t.init(1,0.3,20,20);
+    s.init(1,20);
+  g.addPrimtv(t);
+  a.addGroupe(g);
+  g.addPrimtv(s);
+  a.addGroupe(g);
 interface();
 
  
