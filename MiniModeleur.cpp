@@ -54,7 +54,7 @@ float cameraDistance=0.;
 float aspectRatio;
 int complexiter1=10,complexiter2=10;
 GLfloat ToreRayon=1,Torerayon=0.1;
-GLfloat SphereRayon = 1.0, SpherePas = 50.0, SphereArc = 50.0;
+GLfloat SphereRayon = 1.0, SpherePas = 30;
 // variables Handle d'opengl 
 //--------------------------
 GLuint programID;   // handle pour le shader
@@ -421,7 +421,7 @@ void mouseMotion(int x, int y)
          }
         else if(i==1) {
           Sphere sphere;
-          sphere.init(SphereRayon,SpherePas,SphereArc);
+          sphere.init(SphereRayon,SpherePas);
            a.addPrimtv(sphere);
          }
          panneDroit->close();
@@ -552,8 +552,7 @@ void afficheAjout(GLUI *parentAdd)
           SphereR->set_float_limits(0.3,1000);
           SphereP  =new GLUI_Spinner( ajout, "Pas:",&SpherePas);
           SphereP->set_float_limits(0.1,990);
-          SphereS  =new GLUI_Spinner( ajout, "Arc:",&SphereArc);
-          SphereS->set_float_limits(0.1,990);
+         
           new GLUI_Button(ajout, "Ajouter une sphere", i, ajouterPrimtv );
 
          }
