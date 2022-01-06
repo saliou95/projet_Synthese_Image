@@ -1,5 +1,6 @@
 
 //#include "../utilstexture/sdlglutils.h"
+#define GLM_ENABLE_EXPERIMENTAL
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -13,6 +14,7 @@
 #include <string.h>
 #include "Primtv.h"
 #include "Tore.h"
+#include "Sphere.h"
 #include "Arbre.h"
 #include <GL/glui.h>
 #include "../glm/glm.hpp"
@@ -52,6 +54,7 @@ float cameraDistance=0.;
 float aspectRatio;
 int complexiter1=10,complexiter2=10;
 GLfloat ToreRayon=1,Torerayon=0.1;
+GLfloat SphereRayon = 1.0, SpherePas = 50.0, SphereArc = 50.0;
 // variables Handle d'opengl 
 //--------------------------
 GLuint programID;   // handle pour le shader
@@ -97,12 +100,12 @@ int main_window;
 GLUI *panneDroit, *panneGauche, *panneBas;
 GLUI_Rollout *arbre ,*ajout;
 GLUI_RadioGroup* courantPrimtv;
-GLUI_Spinner *ToreR,*Torer,*Complexiter1,*Complexiter2;
+GLUI_Spinner *ToreR,*Torer,*Complexiter1,*Complexiter2, *SphereR, *SphereP, *SphereS;
 GLUI_Translation *trans_x,*trans_y,*trans_z;
 GLUI_Scrollbar *rotx,*roty,*rotz;
  
  int primtvCourant; 
- int nbPrivDiff=1;
+ int nbPrivDiff=2;
  int show;
  GLfloat transx=0, transy=0, transz=0;
  GLfloat vittessetrans=0.0005;
@@ -111,6 +114,7 @@ GLUI_Scrollbar *rotx,*roty,*rotz;
  Arbre a;
 int nbPrimtv=0;
 Tore montore;
+Sphere monSphere;
 
  
 
@@ -415,6 +419,11 @@ void mouseMotion(int x, int y)
           tore.init(ToreRayon,Torerayon,complexiter1,complexiter2);
            a.addPrimtv(tore);
          }
+        else if(i==1) {
+          Sphere sphere;
+          sphere.init(SphereRayon,SpherePas,SphereArc);
+           a.addPrimtv(sphere);
+         }
          panneDroit->close();
 
   
@@ -530,11 +539,22 @@ void afficheAjout(GLUI *parentAdd)
         {
          if(i==0)
          {
-          ToreR  =new GLUI_Spinner( ajout, "Grand rayon:",&ToreRayon);
+          ToreR  =new GLUI_Spinner( ajout, "Rayon:",&ToreRayon);
           ToreR->set_float_limits(0.3,1000);
-          Torer  =new GLUI_Spinner( ajout, "Petit rayon:",&Torerayon);
+          Torer  =new GLUI_Spinner( ajout, "Pas:",&Torerayon);
           Torer->set_float_limits(0.1,990);
           new GLUI_Button(ajout, "Ajouter un tore", i, ajouterPrimtv );
+
+         }
+        if(i==1)
+         {
+          SphereR  =new GLUI_Spinner( ajout, "Rayon:",&SphereRayon);
+          SphereR->set_float_limits(0.3,1000);
+          SphereP  =new GLUI_Spinner( ajout, "Pas:",&SpherePas);
+          SphereP->set_float_limits(0.1,990);
+          SphereS  =new GLUI_Spinner( ajout, "Arc:",&SphereArc);
+          SphereS->set_float_limits(0.1,990);
+          new GLUI_Button(ajout, "Ajouter une sphere", i, ajouterPrimtv );
 
          }
         
