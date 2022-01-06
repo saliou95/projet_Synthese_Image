@@ -34,7 +34,7 @@ class Arbre
        
            void roter(float angle,glm::vec3 rotmat,int i );
          
-           
+           void scaler(glm::vec3 scamat,int i);
     protected:
              std::vector<Primtv> lesPrimitives;
             

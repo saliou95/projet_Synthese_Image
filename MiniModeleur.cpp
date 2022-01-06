@@ -103,18 +103,19 @@ GLUI_RadioGroup* courantPrimtv;
 GLUI_Spinner *ToreR,*Torer,*Complexiter1,*Complexiter2, *SphereR, *SphereP, *SphereS;
 GLUI_Translation *trans_x,*trans_y,*trans_z;
 GLUI_Scrollbar *rotx,*roty,*rotz;
- 
+GLUI_Spinner *scalex, *scaley,*scalez;
  int primtvCourant; 
  int nbPrivDiff=2;
  int show;
+ GLfloat scalx=1,scaly=1,scalz=1;
  GLfloat transx=0, transy=0, transz=0;
  GLfloat vittessetrans=0.0005;
  vec3 traansAll;
  GLfloat rotationx=0,rotationy=0,rotationz=0;
  Arbre a;
-int nbPrimtv=0;
-Tore montore;
-Sphere monSphere;
+ int nbPrimtv=0;
+ Tore montore;
+ Sphere monSphere;
 
  
 
@@ -489,6 +490,23 @@ void mouseMotion(int x, int y)
           
         }
 
+         if(i==3)
+        {
+          if(primtvCourant==0)
+            for(int j=0 ;j<a.getTaille();j++)
+              a.scaler(vec3(scalx,scaly,scalz),j);
+          
+          
+          else
+              a.translater(vec3(scalx,scaly,scalz),primtvCourant-1);
+          scalex->set_float_val(1.0);
+          scaley->set_float_val(1.0);
+          scalez->set_float_val(1.0);
+          transx=1;
+          transy=1;
+          transz=1;
+        }
+
  
       
       }
@@ -529,16 +547,17 @@ void afficheAjout(GLUI *parentAdd)
 {
 
 
-        Complexiter1  =new GLUI_Spinner( parentAdd, "ComplexiterVert",&complexiter1);
-        Complexiter1->set_int_limits(10,200);
-        Complexiter2  =new GLUI_Spinner( parentAdd, "",&complexiter2);
-        Complexiter2->set_int_limits(10,200);
+     
         ajout=new GLUI_Rollout(parentAdd, "AjouterPrimitives", true );
 
         for (int i=0;i< nbPrivDiff;i++)
         {
          if(i==0)
          {
+          Complexiter1  =new GLUI_Spinner( ajout, "ComplexiterVert",&complexiter1);
+          Complexiter1->set_int_limits(10,200);
+          Complexiter2  =new GLUI_Spinner( ajout, "",&complexiter2);
+          Complexiter2->set_int_limits(10,200);
           ToreR  =new GLUI_Spinner( ajout, "Rayon:",&ToreRayon);
           ToreR->set_float_limits(0.3,1000);
           Torer  =new GLUI_Spinner( ajout, "Pas:",&Torerayon);
@@ -562,7 +581,7 @@ void afficheAjout(GLUI *parentAdd)
 
 void afficheTransformations(GLUI* panneBas)
 {
-GLUI_Spinner *vittesse  =new GLUI_Spinner( panneBas, "Vittesse de transformation:",&vittessetrans);
+GLUI_Spinner *vittesse  =new GLUI_Spinner( panneBas, "Vittesse de translation:",&vittessetrans);
           vittesse->set_float_limits(0.00001,0.1);
         new GLUI_Column( panneBas, false );
 trans_x = new GLUI_Translation(panneBas, "Translation X", GLUI_TRANSLATION_X,&transx,1,transformations );
@@ -580,8 +599,16 @@ roty->set_float_limits(-360.,360.);
 
 rotz= new GLUI_Scrollbar(panneBas, " rotationz",GLUI_SCROLL_HORIZONTAL,&rotationz,2,transformations );
 rotz->set_float_limits(-360.,360.);
+ new GLUI_Column( panneBas, false );
+scalex  =new GLUI_Spinner( panneBas, "Scalex:",&scalx,3,transformations);
+          scalex->set_float_limits(0.8,1.2);
+           new GLUI_Column( panneBas, false );
+scaley  =new GLUI_Spinner( panneBas, "ScaleY",&scaly,3,transformations);
+          scaley->set_float_limits(0.8,1.2);
+           new GLUI_Column( panneBas, false );
 
-
+scalez  =new GLUI_Spinner( panneBas, "ScaleZ",&scalz,3,transformations);
+          scalez->set_float_limits(0.8,1.2);
 }
 
 void interface()
@@ -630,22 +657,6 @@ std::cout << "***** Info GPU *****" << std::endl;
     std::cout << "Version GLSL : " << glGetString (GL_SHADING_LANGUAGE_VERSION) << std::endl << std::endl;
 
 	initOpenGL(); 
-
-
-
-
-montore.init(1.,.3,complexiter1,complexiter2);
-montore.translater(vec3(1,0,0));
-montore.translater(vec3(-2,0,0));
-montore.roter(90,vec3(1,0,0));
-montore.roter(130,vec3(0,1,0));
-
-
-a.addPrimtv(montore);
-
-
-
-nbPrimtv=a.getTaille();
 interface();
 
  
