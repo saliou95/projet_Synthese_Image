@@ -15,6 +15,7 @@
 #include "Primtv.h"
 #include "Tore.h"
 #include "Sphere.h"
+#include "Cube.h"
 #include "Arbre.h"
 #include <GL/glui.h>
 #include "../glm/glm.hpp"
@@ -38,6 +39,7 @@ void drawString(const char *str, int x, int y, float color[4], void *font);
 void showInfo();
 void interface();
 void ajouterPrimtv();
+void appliquerEchelle(int i);
 
 void afficherArbre(GLUI *panneDroit);
 void afficheAjout(GLUI* panneGauche);
@@ -55,6 +57,7 @@ float aspectRatio;
 int complexiter1=10,complexiter2=10;
 GLfloat ToreRayon=1,Torerayon=0.1;
 GLfloat SphereRayon = 1.0, SpherePas = 50.0, SphereArc = 50.0;
+GLfloat CubeLongueur = 1.0, CubeLargeur = 1;
 // variables Handle d'opengl 
 //--------------------------
 GLuint programID;   // handle pour le shader
@@ -101,13 +104,14 @@ GLUI *panneDroit, *panneGauche, *panneBas;
 GLUI_Rollout *arbre ,*ajout;
 GLUI_RadioGroup* courantPrimtv;
 GLUI_Spinner *ToreR,*Torer,*Complexiter1,*Complexiter2, *SphereR, *SphereP, *SphereS;
+GLUI_Spinner *CubeL, * Cubel, *scale_gl;
 GLUI_Translation *trans_x,*trans_y,*trans_z;
 GLUI_Scrollbar *rotx,*roty,*rotz;
  
  int primtvCourant; 
- int nbPrivDiff=2;
+ int nbPrivDiff=3;
  int show;
- GLfloat transx=0, transy=0, transz=0;
+ GLfloat transx=0, transy=0, transz=0, scale_gl_value=0;
  GLfloat vittessetrans=0.0005;
  vec3 traansAll;
  GLfloat rotationx=0,rotationy=0,rotationz=0;
@@ -408,8 +412,6 @@ void mouseMotion(int x, int y)
 
 
 
-
-
         void ajouterPrimtv(int i)
         {
          // cout <<i<<endl;
@@ -424,11 +426,16 @@ void mouseMotion(int x, int y)
           sphere.init(SphereRayon,SpherePas,SphereArc);
            a.addPrimtv(sphere);
          }
+        else if(i==2) {
+          Cube cube;
+          cube.init(CubeLongueur, CubeLargeur);
+           a.addPrimtv(cube);
+         }
          panneDroit->close();
 
   
      interface();
-             }
+    }
    
      
       void defineshow(int i)
@@ -447,8 +454,23 @@ void mouseMotion(int x, int y)
         interface();
       }
 
+      void appliquerEchelle(int i) {
+          cout<<"LA valuer echelle "<<scale_gl_value<<" "<<endl;
+          if(primtvCourant==0) {
+            for(int j=0 ;j<a.getTaille();j++)
+              a.echeller(vec3(scale_gl_value,scale_gl_value,scale_gl_value),j);
+            }
+          else {
+            a.echeller(vec3(scale_gl_value,scale_gl_value,scale_gl_value),primtvCourant-1);
+              // a.echeller(vec3(vittessetrans*transx,vittessetrans*transy,-vittessetrans*transz),primtvCourant-1);
+          }
+          scale_gl->set_float_val(0.0);
+          scale_gl_value=0;
+      }
+
       void transformations(int i)
       {
+        cout<<"Voici i: " <<i<<endl;
         if(i==1)
         {
           if(primtvCourant==0)
@@ -488,6 +510,20 @@ void mouseMotion(int x, int y)
           rotationz=0;
           
         }
+        // if(i==2)
+        // {
+        //   cout<<"LA valuer echelle "<<scale_gl_value<<endl;
+        //   if(primtvCourant==0) {
+        //     for(int j=0 ;j<a.getTaille();j++)
+        //       a.echeller(scale_gl_value,vec3(vittessetrans*transx,vittessetrans*transy,-vittessetrans*transz),j);
+        //     }
+        //   else {
+        //     a.echeller(scale_gl_value,vec3(vittessetrans*transx,vittessetrans*transy,-vittessetrans*transz),primtvCourant-1);
+        //       // a.echeller(vec3(vittessetrans*transx,vittessetrans*transy,-vittessetrans*transz),primtvCourant-1);
+        //   }
+        //   scale_gl->set_float_val(0.0);
+        //   scale_gl_value=0;
+        // }
 
  
       
@@ -557,6 +593,14 @@ void afficheAjout(GLUI *parentAdd)
           new GLUI_Button(ajout, "Ajouter une sphere", i, ajouterPrimtv );
 
          }
+        if(i==2)
+         {
+          CubeL  =new GLUI_Spinner( ajout, "Longueur:",&CubeLongueur);
+          CubeL->set_float_limits(0.3,1000);
+          Cubel  =new GLUI_Spinner( ajout, "Largeur:",&CubeLargeur);
+          Cubel->set_float_limits(0.1,990);
+          new GLUI_Button(ajout, "Ajouter un cube", i, ajouterPrimtv );
+         }
         
         }
 }
@@ -571,8 +615,15 @@ trans_x = new GLUI_Translation(panneBas, "Translation X", GLUI_TRANSLATION_X,&tr
 trans_y = new GLUI_Translation(panneBas, "Translation Y", GLUI_TRANSLATION_Y,&transy,1,transformations );
  new GLUI_Column( panneBas, false );
 trans_z = new GLUI_Translation(panneBas, "Translation Z", GLUI_TRANSLATION_Z,&transz,1,transformations );
- 
  new GLUI_Column( panneBas, false );
+
+//  scale_gl = new GLUI_Translation(panneBas, "Echelle", GLUI_TRANSLATION_Z,&scale_gl_value,1,transformations );
+//  new GLUI_Column( panneBas, false ) = new GLUI_Scrollbar(panneBas, " rotationx",GLUI_SCROLL_HORIZONTAL,&scale_gl_value,1,transformations ->set_float_limits(-100000.,100000.);,*scale_gl
+
+scale_gl = new GLUI_Spinner( panneBas, "Echelle",&scale_gl_value);
+scale_gl->set_float_limits(0.1,990);
+new GLUI_Button( panneBas, "Appliquer echelle", -1,appliquerEchelle );
+new GLUI_Column( panneBas, false );
 rotx= new GLUI_Scrollbar(panneBas, " rotationx",GLUI_SCROLL_HORIZONTAL,&rotationx,2,transformations );
 rotx->set_float_limits(-360.,360.);
 
@@ -635,14 +686,14 @@ std::cout << "***** Info GPU *****" << std::endl;
 
 
 
-montore.init(1.,.3,complexiter1,complexiter2);
-montore.translater(vec3(1,0,0));
-montore.translater(vec3(-2,0,0));
-montore.roter(90,vec3(1,0,0));
-montore.roter(130,vec3(0,1,0));
+// montore.init(1.,.3,complexiter1,complexiter2);
+// montore.translater(vec3(1,0,0));
+// montore.translater(vec3(-2,0,0));
+// montore.roter(90,vec3(1,0,0));
+// montore.roter(130,vec3(0,1,0));
 
 
-a.addPrimtv(montore);
+// a.addPrimtv(montore);
 
 
 

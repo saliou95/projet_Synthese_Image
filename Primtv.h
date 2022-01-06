@@ -53,6 +53,7 @@ class Primtv
            void miaech(glm::vec3 scamat );
            void translater(glm::vec3 transvect );
            void roter(float angle,glm::vec3 rotmat );
+           void echeller( glm::vec3 scalemat);
            void Changeshow();
     protected:
              std::vector<Sommet> positions;
@@ -60,9 +61,10 @@ class Primtv
              std::vector<Normale> normales; 
           
            //  glm::mat4 model=glm::mat4(1.0);
-             glm::mat4 rotmodel=glm::mat4(1.0f);
-             glm::mat4 transmodel=glm::mat4(1.0f);
-             glm::mat4 scamodel=glm::mat4(1.0f);
+             glm::mat4 echellemodel= glm::mat3(1.0f);
+             glm::mat4 rotmodel= glm::mat4(1.0f);
+             glm::mat4 transmodel= glm::mat4(1.0f);
+             glm::mat4 scamodel= glm::mat4(1.0f);
     public:
              int show=1;
              std::string nom;

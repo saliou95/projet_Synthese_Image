@@ -29,12 +29,12 @@ using namespace glm;
 
         void Primtv::afficher()
         {
-            cout<<"-----------Les Coordonner des points----------" <<endl;
+            cout<<"-----------Les Coordonnées des points----------" <<endl;
 
             for(Sommet i:positions)
                 cout << i.x<<"  "<<i.y<<" "<<i.z<< endl;
 
-            cout<<"-------------Les indice par faces-------------" <<endl;
+            cout<<"-------------Les indices par faces-------------" <<endl;
             
             for(Face i:faces)
                 cout << i.indiceS1<<"  "<<i.indiceS2<<" "<<i.indiceS3<< endl;
@@ -86,9 +86,12 @@ using namespace glm;
 
         }
 
+        void Primtv::echeller(glm::vec3 scalemat) {
+            echellemodel=scale(echellemodel, scalemat);
+            cout<<"HEYYY"<<endl;
+        }
+
         mat4 Primtv::getmodel()
         {
-
-
-            return scamodel*transmodel*rotmodel ;
+            return scamodel*transmodel*rotmodel*echellemodel ;
         }

@@ -51,6 +51,11 @@ using namespace glm;
 
           lesPrimitives[i].roter(angle,rotmat);
         }
+
+        void Arbre::echeller(glm::vec3 scalemat,int i) 
+        {
+          lesPrimitives[i].echeller(scalemat);
+        }
       
         void Arbre::afficherLesPrimtv()
         {

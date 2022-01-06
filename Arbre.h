@@ -33,6 +33,8 @@ class Arbre
            void translater(glm::vec3,int i);
        
            void roter(float angle,glm::vec3 rotmat,int i );
+
+           void echeller(glm::vec3 scalemat, int i);
          
            
     protected:
