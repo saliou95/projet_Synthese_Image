@@ -16,6 +16,7 @@
 #include "Groupe.h"
 #include "Tore.h"
 #include "Sphere.h"
+#include "Cube.h"
 #include "Arbre.h"
 #include <GL/glui.h>
 #include "../glm/glm.hpp"
@@ -56,6 +57,7 @@ float aspectRatio;
 int complexiter1=10,complexiter2=10;
 GLfloat ToreRayon=1,Torerayon=0.1;
 GLfloat SphereRayon = 1.0, SpherePas = 30;
+GLfloat CubeLongueur = 1.0, CubeLargeur = 1;
 // variables Handle d'opengl 
 //--------------------------
 GLuint programID;   // handle pour le shader
@@ -105,8 +107,9 @@ GLUI_Spinner *ToreR,*Torer,*Complexiter1,*Complexiter2, *SphereR, *SphereP, *Sph
 GLUI_Translation *trans_x,*trans_y,*trans_z;
 GLUI_Scrollbar *rotx,*roty,*rotz;
 GLUI_Spinner *scalex, *scaley,*scalez;
+GLUI_Spinner *CubeL, * Cubel;
  int primtvCourant,groupeCourant=0; 
- int nbPrivDiff=2;
+ int nbPrivDiff=3;
  int show;
  GLfloat scalx=1,scaly=1,scalz=1;
  GLfloat transx=0, transy=0, transz=0;
@@ -439,6 +442,13 @@ void mouseMotion(int x, int y)
           sphere.init(SphereRayon,SpherePas);
            a.addPrimtv(sphere,groupeCourant);
          }
+
+
+        else if(i==2) {
+          Cube cube;
+          cube.init(CubeLongueur, CubeLargeur);
+          a.addPrimtv(cube,groupeCourant);
+          }
          panneDroit->close();
 
   
@@ -636,7 +646,16 @@ void afficheAjout(GLUI *parentAdd)
           new GLUI_Button(ajout, "Ajouter une sphere", i, ajouterPrimtv );
 
          }
-        
+         
+        if(i==2)
+        {
+          CubeL =new GLUI_Spinner( ajout, "Longueur:",&CubeLongueur);
+          CubeL->set_float_limits(0.3,1000);
+          Cubel =new GLUI_Spinner( ajout, "Largeur:",&CubeLargeur);
+          Cubel->set_float_limits(0.1,990);
+          new GLUI_Button(ajout, "Ajouter un cube", i, ajouterPrimtv );
+        }
+       
         }
 }
 
