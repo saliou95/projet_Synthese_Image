@@ -58,6 +58,10 @@ int complexiter1=10,complexiter2=10;
 GLfloat ToreRayon=1,Torerayon=0.1;
 GLfloat SphereRayon = 1.0, SpherePas = 30;
 GLfloat CubeLongueur = 1.0, CubeLargeur = 1;
+
+// std::string NewGroupNom;
+char  NewGroupNom[20] = {""};
+
 // variables Handle d'opengl 
 //--------------------------
 GLuint programID;   // handle pour le shader
@@ -101,9 +105,10 @@ int screenWidth = 500;
 //interface graphique variables//
 int main_window;
 GLUI *panneDroit, *panneGauche, *panneBas;
-GLUI_Rollout *arbre ,*ajout,*groupe,*primtvs;
+GLUI_Rollout *arbre ,*ajout,*groupe,*primtvs, *ajoutGroup;
 GLUI_RadioGroup* courantPrimtv,*courantGroupe;
 GLUI_Spinner *ToreR,*Torer,*Complexiter1,*Complexiter2, *SphereR, *SphereP, *SphereS;
+GLUI_EditText *GroupeNom;
 GLUI_Translation *trans_x,*trans_y,*trans_z;
 GLUI_Scrollbar *rotx,*roty,*rotz;
 GLUI_Spinner *scalex, *scaley,*scalez;
@@ -231,7 +236,7 @@ void affichage()
            if(pp.show==1)
            {
               genereVBO(pp);
-            cout<<"trace"<<pp.nom<<endl;
+            // cout<<"trace"<<pp.nom<<endl;
               MVP = Projection * View* (Model*p.getmodel()*pp.getmodel());
               traceObjet(pp); 
            }
@@ -455,11 +460,19 @@ void mouseMotion(int x, int y)
      interface();
              }
    
+
+      void ajouterGroup(int id) {
+        Groupe groupe(NewGroupNom);
+        a.addGroupe(groupe);
+        GroupeNom->set_text("");
+        panneDroit->close();
+        interface();
+      }
      
       void defineshow(int i)
        {
-              a.Changeshow(i);
-              //cout<< a.getPrimtv(i).show<<endl;
+          a.Changeshow(i);
+          //cout<< a.getPrimtv(i).show<<endl;
               
        }
        void defineshowPrimtv(int j)
@@ -615,10 +628,14 @@ void supprimerg(int j)
 }
 
 void afficheAjout(GLUI *parentAdd)
-{
+{     
+        ajoutGroup=new GLUI_Rollout(parentAdd, "Ajout de groupe", true );
+        // for(int i=0; i< a.getTaille();i++) {}
+        GroupeNom  = new GLUI_EditText(ajoutGroup, "Nom", NewGroupNom, -3);
+        // ajout, "Rayon:",&NewGroupNom
+        new GLUI_Button(ajoutGroup, "Ajouter un groupe", -2, ajouterGroup );
 
 
-     
         ajout=new GLUI_Rollout(parentAdd, "AjouterPrimitives", true );
 
         for (int i=0;i< nbPrivDiff;i++)
@@ -737,15 +754,16 @@ std::cout << "***** Info GPU *****" << std::endl;
     std::cout << "Version GLSL : " << glGetString (GL_SHADING_LANGUAGE_VERSION) << std::endl << std::endl;
 
 	initOpenGL(); 
-  Groupe g;
+  Groupe g1("Groupe 1");
+  Groupe g2("Groupe 2");
   Tore t;
   Sphere s;
     t.init(1,0.3,20,20);
     s.init(1,20);
-  g.addPrimtv(t);
-  a.addGroupe(g);
-  g.addPrimtv(s);
-  a.addGroupe(g);
+  g1.addPrimtv(t);
+  a.addGroupe(g1);
+  g2.addPrimtv(s);
+  a.addGroupe(g2);
 interface();
 
  

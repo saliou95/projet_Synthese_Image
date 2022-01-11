@@ -5,7 +5,14 @@ using namespace glm;
         Groupe::Groupe()
         {
             nom="groupe";
+        }
 
+        Groupe::Groupe(std::string n)
+        {
+            nom=n;
+        }
+        void Groupe::setNom(std::string s) {
+              nom = s;
         }
 
         Primtv Groupe::getPrimtv(int i)

@@ -10,15 +10,17 @@
 #include <stdio.h>
 #include <vector>
 #include "Primtv.h"
-
+#include <string>
 
 class Groupe 
 {
     public:
            Groupe();
-
+           Groupe(std::string n);
            glm::mat4 getmodel();
            Primtv getPrimtv(int i);
+
+           void setNom(std::string s);
 
            int getTaille();
 
