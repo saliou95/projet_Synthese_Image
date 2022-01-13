@@ -17,6 +17,7 @@
 #include "Tore.h"
 #include "Sphere.h"
 #include "Cube.h"
+#include "Cylindre.h"
 #include "Arbre.h"
 #include <GL/glui.h>
 #include "../glm/glm.hpp"
@@ -55,6 +56,8 @@ float cameraAngleY;
 float cameraDistance=0.;
 float aspectRatio;
 int complexiter1=10,complexiter2=10;
+int Cycomplexiter1=10,Cycomplexiter2=10;
+GLfloat CylindreRayon=0.5;
 GLfloat ToreRayon=1,Torerayon=0.1;
 GLfloat SphereRayon = 1.0, SpherePas = 30;
 GLfloat CubeLongueur = 1.0, CubeLargeur = 1;
@@ -107,14 +110,14 @@ int main_window;
 GLUI *panneDroit, *panneGauche, *panneBas;
 GLUI_Rollout *arbre ,*ajout,*groupe,*primtvs, *ajoutGroup;
 GLUI_RadioGroup* courantPrimtv,*courantGroupe;
-GLUI_Spinner *ToreR,*Torer,*Complexiter1,*Complexiter2, *SphereR, *SphereP, *SphereS;
+GLUI_Spinner *ToreR,*Torer,*Complexiter1,*Complexiter2, *SphereR, *SphereP, *SphereS,*CylindreR,*CylindrevertP,*CylindrehorP;
 GLUI_EditText *GroupeNom;
 GLUI_Translation *trans_x,*trans_y,*trans_z;
 GLUI_Scrollbar *rotx,*roty,*rotz;
 GLUI_Spinner *scalex, *scaley,*scalez;
 GLUI_Spinner *CubeL, * Cubel;
  int primtvCourant,groupeCourant=0; 
- int nbPrivDiff=3;
+ int nbPrivDiff=4;
  int show;
  GLfloat scalx=1,scaly=1,scalz=1;
  GLfloat transx=0, transy=0, transz=0;
@@ -454,6 +457,13 @@ void mouseMotion(int x, int y)
           cube.init(CubeLongueur, CubeLargeur);
           a.addPrimtv(cube,groupeCourant);
           }
+
+           else if(i==3) {
+          Cylindre c;
+          c.init(CylindreRayon, Cycomplexiter1,Cycomplexiter2);
+          a.addPrimtv(c,groupeCourant);
+          }
+
          panneDroit->close();
 
   
@@ -642,9 +652,9 @@ void afficheAjout(GLUI *parentAdd)
         {
          if(i==0)
          {
-          Complexiter1  =new GLUI_Spinner( ajout, "ComplexiterVert",&complexiter1);
+          Complexiter1  =new GLUI_Spinner( ajout, "pas vertt",&complexiter1);
           Complexiter1->set_int_limits(10,200);
-          Complexiter2  =new GLUI_Spinner( ajout, "",&complexiter2);
+          Complexiter2  =new GLUI_Spinner( ajout, "pas horiz",&complexiter2);
           Complexiter2->set_int_limits(10,200);
           ToreR  =new GLUI_Spinner( ajout, "Rayon:",&ToreRayon);
           ToreR->set_float_limits(0.3,1000);
@@ -672,6 +682,17 @@ void afficheAjout(GLUI *parentAdd)
           Cubel->set_float_limits(0.1,990);
           new GLUI_Button(ajout, "Ajouter un cube", i, ajouterPrimtv );
         }
+
+        if(i==3)
+         {
+          CylindrevertP  =new GLUI_Spinner( ajout, "pas vertt",&Cycomplexiter1);
+          CylindrevertP->set_int_limits(10,200);
+          CylindrehorP  =new GLUI_Spinner( ajout, "pas horiz",&Cycomplexiter2);
+          CylindrehorP->set_int_limits(10,200);
+          CylindreR  =new GLUI_Spinner( ajout, "Rayon:",&CylindreRayon);
+          CylindreR->set_float_limits(0.3,1000);
+           new GLUI_Button(ajout, "Ajouter un cylindre", i, ajouterPrimtv );
+         }
        
         }
 }
@@ -754,16 +775,15 @@ std::cout << "***** Info GPU *****" << std::endl;
     std::cout << "Version GLSL : " << glGetString (GL_SHADING_LANGUAGE_VERSION) << std::endl << std::endl;
 
 	initOpenGL(); 
-  Groupe g1("Groupe 1");
-  Groupe g2("Groupe 2");
+  Groupe g1("Default Groupe");
+
+  Cylindre c;
+  c.init(0.5,10,10);
   Tore t;
-  Sphere s;
-    t.init(1,0.3,20,20);
-    s.init(1,20);
-  g1.addPrimtv(t);
+  t.init(0.5,1,10,10);
+c.afficher();
   a.addGroupe(g1);
-  g2.addPrimtv(s);
-  a.addGroupe(g2);
+   a.addPrimtv(c,0);
 interface();
 
  

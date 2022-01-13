@@ -38,6 +38,12 @@ using namespace glm;
         f2.indiceS1=(unsigned int)((i*(pas))+ j);
         f2.indiceS2=(unsigned int)(((i+1)*(pas))+ (j+1));
         f2.indiceS3=(unsigned int)(((i)*(pas))+ (j+1));
+
+          Normale n;
+        n.x =(cos(pp))*cos(SS);
+        n.y =(cos(pp))*cos(SS);
+        n.z =(sin(SS));
+        addNormale(n);
         addFace(f);
         addFace(f2);
 
