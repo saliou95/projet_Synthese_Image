@@ -1,5 +1,6 @@
 
 //#include "../utilstexture/sdlglutils.h"
+#define GLM_ENABLE_EXPERIMENTAL
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -12,63 +13,38 @@
 #include "shader.hpp"
 #include <string.h>
 #include "Primtv.h"
+#include "Groupe.h"
 #include "Tore.h"
-
+#include "Sphere.h"
+#include "Cube.h"
+#include "Cylindre.h"
+#include "Arbre.h"
 #include <GL/glui.h>
 #include "../glm/glm.hpp"
 #include "../glm/gtc/matrix_transform.hpp"
+#include <glm/gtx/string_cast.hpp>
 using namespace glm;
 using namespace std;
 
-#define P_SIZE 3
-#define N_SIZE 3		// c'est forcement 3
-#define C_SIZE 3
 
-#define N_VERTS  8
-#define N_VERTS_BY_FACE  3
-#define N_FACES  12
-
-#define NB_R 40
-#define NB_r 20
-#define BUFFER_OFFSET(i) ((char *)NULL + (i))
-
-
- float aspectRatio;
-int main_window;
-GLUI *panneDroit, *panneGauche;
-
-
-
-
-
-
-
-
-
-
-
-GLfloat sommets[(NB_R+1)*(NB_r+1)*3] ; // x 3 coordonnées (+1 acr on double les dernierspoints pour avoir des coord de textures <> pour les points de jonctions)
-GLuint indices[NB_R*NB_r*6]; // x6 car pour chaque face quadrangulaire on a 6 indices (2 triangles=2x 3 indices)
-GLfloat coordTexture[(NB_R+1)*(NB_r+1)*2] ; // x 2 car U+V par sommets
-GLfloat normales[(NB_R+1)*(NB_r+1)*3];
-
-
-
-Tore montore;
 // initialisations
 
 void genereVBO();
 void deleteVBO();
-void traceObjet();
-
+void traceObjet(Primtv montore);
 void affichage();
 void clavier(unsigned char,int,int);
 void mouse(int, int, int, int);
 void mouseMotion(int, int);
 void reshape(int,int);
-
 void drawString(const char *str, int x, int y, float color[4], void *font);
 void showInfo();
+void interface();
+void ajouterPrimtv();
+
+void afficherArbre(GLUI *panneDroit);
+void afficheAjout(GLUI* panneGauche);
+void afficheTransformations(GLUI* panneBas);
 void *font = GLUT_BITMAP_8_BY_13; // pour afficher des textes 2D sur l'ecran
 // variables globales pour OpenGL
 bool mouseLeftDown;
@@ -78,6 +54,16 @@ float mouseX, mouseY;
 float cameraAngleX;
 float cameraAngleY;
 float cameraDistance=0.;
+float aspectRatio;
+int complexiter1=10,complexiter2=10;
+int Cycomplexiter1=10,Cycomplexiter2=10;
+GLfloat CylindreRayon=0.5;
+GLfloat ToreRayon=1,Torerayon=0.1;
+GLfloat SphereRayon = 1.0, SpherePas = 30;
+GLfloat CubeLongueur = 1.0, CubeLargeur = 1;
+
+// std::string NewGroupNom;
+char  NewGroupNom[20] = {""};
 
 // variables Handle d'opengl 
 //--------------------------
@@ -111,88 +97,42 @@ vec3 LightIntensities(1.,1.,1.);// couleur la lumiere
 GLfloat LightAttenuation =1.;
 GLfloat LightAmbientCoefficient=.1;
 
-glm::mat4 MVP;      // justement la voilà
+glm::mat4 MVP;    
+glm::mat4 MVP2;   // justement la voilà
 glm::mat4 Model, View, Projection;    // Matrices constituant MVP
-
-
 
 int screenHeight = 500;
 int screenWidth = 500;
 
-// pour la texcture
-//-------------------
-GLuint image ;
-GLuint bufTexture,bufNormalMap;
-GLuint locationTexture,locationNormalMap;
-//-------------------------
+
+//interface graphique variables//
+int main_window;
+GLUI *panneDroit, *panneGauche, *panneBas;
+GLUI_Rollout *arbre ,*ajout,*groupe,*primtvs, *ajoutGroup;
+GLUI_RadioGroup* courantPrimtv,*courantGroupe;
+GLUI_Spinner *ToreR,*Torer,*Complexiter1,*Complexiter2, *SphereR, *SphereP, *SphereS,*CylindreR,*CylindrevertP,*CylindrehorP;
+GLUI_EditText *GroupeNom;
+GLUI_Translation *trans_x,*trans_y,*trans_z;
+GLUI_Scrollbar *rotx,*roty,*rotz;
+GLUI_Spinner *scalex, *scaley,*scalez;
+GLUI_Spinner *CubeL, * Cubel;
+ int primtvCourant,groupeCourant=0; 
+ int nbPrivDiff=4;
+ int show;
+ GLfloat scalx=1,scaly=1,scalz=1;
+ GLfloat transx=0, transy=0, transz=0;
+ GLfloat vittessetrans=0.0005;
+ vec3 traansAll;
+ GLfloat rotationx=0,rotationy=0,rotationz=0;
+ Arbre a;
 
 
-//----------------------------------------
-GLubyte* glmReadPPM(char* filename, int* width, int* height)
-//----------------------------------------
-{
-    FILE* fp;
-    int i, w, h, d;
-    unsigned char* image;
-    char head[70];          /* max line <= 70 in PPM (per spec). */
-    
-    fp = fopen(filename, "rb");
-    if (!fp) {
-        perror(filename);
-        return NULL;
-    }
-    
-    /* grab first two chars of the file and make sure that it has the
-       correct magic cookie for a raw PPM file. */
-    fgets(head, 70, fp);
-    if (strncmp(head, "P6", 2)) {
-        fprintf(stderr, "%s: Not a raw PPM file\n", filename);
-        return NULL;
-    }
-    
-    /* grab the three elements in the header (width, height, maxval). */
-    i = 0;
-    while(i < 3) {
-        fgets(head, 70, fp);
-        if (head[0] == '#')     /* skip comments. */
-            continue;
-        if (i == 0)
-            i += sscanf(head, "%d %d %d", &w, &h, &d);
-        else if (i == 1)
-            i += sscanf(head, "%d %d", &h, &d);
-        else if (i == 2)
-            i += sscanf(head, "%d", &d);
-    }
-    
-    /* grab all the image data in one fell swoop. */
-    image = new unsigned char[w*h*3];
-    fread(image, sizeof(unsigned char), w*h*3, fp);
-    fclose(fp);
-    
-    *width = w;
-    *height = h;
-    return image;
-}
+ int nbPrimtv=0;
 
-//----------------------------------------
-void initTexture(void)
-//-----------------------------------------
-{
- int iwidth  , iheight;
-   GLubyte *  image = NULL;
+
  
-  //  image = glmReadPPM("./texture/Metalcolor.ppm", &iwidth, &iheight);
-	 glGenTextures(1, &bufTexture);	
-	 glBindTexture(GL_TEXTURE_2D, bufTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	 glTexImage2D(GL_TEXTURE_2D, 0, 3, iwidth,iheight, 0, GL_RGB,GL_UNSIGNED_BYTE,image);
-   
-    locationTexture = glGetUniformLocation(programID, "myTextureSampler"); // et il y a la texture elle même  
- //   glBindAttribLocation(programID,indexUVTexture,"vertexUV");	// il y a les coord UV  
-}
+
+
 //----------------------------------------
 void initOpenGL(void)
 //----------------------------------------
@@ -203,150 +143,34 @@ void initOpenGL(void)
   programID = LoadShaders( "PhongShader.vert", "PhongShader.frag" );
   MatrixIDMVP = glGetUniformLocation(programID, "MVP");
   Projection = glm::perspective( glm::radians(60.f), 1.0f, 1.0f, 1000.0f);
-  //glFrustum( -xy_aspect*.04, xy_aspect*.04, -.04, .04, .1, 15.0 );
- //float a=(aspectRatio*0.04+(-aspectRatio*0.04))/(aspectRatio*0.04-(-aspectRatio*0.04));
-  //float b=
-//vec4()
-  //mat4x4();
   locCameraPosition = glGetUniformLocation(programID, "cameraPosition");
   locLightPosition = glGetUniformLocation(programID, "light.position");
   locLightIntensities = glGetUniformLocation(programID, "light.intensities");//a.k.a the color of the light
   locLightAttenuation = glGetUniformLocation(programID, "light.attenuation");
   locLightAmbientCoefficient = glGetUniformLocation(programID, "light.ambientCoefficient");
 }
-//----------------------------------------
-int main(int argc,char **argv)
-//----------------------------------------
-{
-  glutInit(&argc,argv);
-  glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE|GLUT_RGB);
-  glutInitWindowPosition(200,200);
-  glutInitWindowSize(screenWidth,screenHeight);
-   main_window=glutCreateWindow("Mini Modeleur");
-
-
-// Initialize GLEW
-	if (glewInit() != GLEW_OK) {
-		fprintf(stderr, "Failed to initialize GLEW\n");
-		return -1;
-	}
-
-//info version GLSL
-std::cout << "***** Info GPU *****" << std::endl;
-    std::cout << "Fabricant : " << glGetString (GL_VENDOR) << std::endl;
-    std::cout << "Carte graphique: " << glGetString (GL_RENDERER) << std::endl;
-    std::cout << "Version : " << glGetString (GL_VERSION) << std::endl;
-    std::cout << "Version GLSL : " << glGetString (GL_SHADING_LANGUAGE_VERSION) << std::endl << std::endl;
-
-	initOpenGL(); 
-
-
-////////////////////////////////INTERFDACE GLUI///////////////////////////////////////////:
-
-//////////////////////////PANNE DROIT////////////////////////////
-panneDroit= GLUI_Master.create_glui_subwindow( main_window, 
-					    GLUI_SUBWINDOW_RIGHT );
-
-
-panneDroit->set_main_gfx_window( main_window );
-
-////////////////////////////////////////////////////////////////
-
-
-//////////////////////////PANNE Gauche////////////////////////////
-panneGauche= GLUI_Master.create_glui_subwindow( main_window, 
-					    GLUI_SUBWINDOW_LEFT );
-
-
-panneGauche->set_main_gfx_window( main_window );
-
-////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   montore.init(1.,.3,40,20);
- //  createTorus(1.,.3);
-
- // construction des VBO a partir des tableaux du cube deja construit
-  genereVBO();
-  //initTexture();
-  
-
-  /* enregistrement des fonctions de rappel */
-  glutDisplayFunc(affichage);
-  //glutKeyboardFunc(clavier);
-  //glutReshapeFunc(reshape);
-  //glutMouseFunc(mouse);
-
-
-
-
-  GLUI_Master.set_glutReshapeFunc( reshape );  
-  GLUI_Master.set_glutKeyboardFunc( clavier );
-  GLUI_Master.set_glutSpecialFunc( NULL );
-  GLUI_Master.set_glutMouseFunc( mouse );
-  glutMotionFunc( mouseMotion );
- 
-
-  /* Entree dans la boucle principale glut */
-  glutMainLoop();
-
-  glDeleteProgram(programID);
-  deleteVBO();
-  return 0;
-}
-
-
-void genereVBO ()
+void genereVBO (Primtv maprimitive)
 {
   
     glGenBuffers(1, &VAO);
     glBindVertexArray(VAO); // ici on bind le VAO , c'est lui qui recupèrera les configurations des VBO glVertexAttribPointer , glEnableVertexAttribArray...
 
-
     if(glIsBuffer(VBO_sommets) == GL_TRUE) glDeleteBuffers(1, &VBO_sommets);
     glGenBuffers(1, &VBO_sommets);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_sommets);
-    glBufferData(GL_ARRAY_BUFFER, montore.getPositions().size()*sizeof(Sommet),&montore.getPositions()[0] , GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, maprimitive.getPositions().size()*sizeof(Sommet),&maprimitive.getPositions()[0] , GL_STATIC_DRAW);
     glVertexAttribPointer ( indexVertex, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
 
     if(glIsBuffer(VBO_normales) == GL_TRUE) glDeleteBuffers(1, &VBO_normales);
     glGenBuffers(1, &VBO_normales);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_normales);
-    glBufferData(GL_ARRAY_BUFFER, montore.getNormales().size()*sizeof(Normale),&montore.getNormales()[0]  , GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, maprimitive.getNormales().size()*sizeof(Normale),&maprimitive.getNormales()[0]  , GL_STATIC_DRAW);
     glVertexAttribPointer ( indexNormale, 3, GL_FLOAT, GL_FALSE, 0, (void*)0  );
 
     if(glIsBuffer(VBO_indices) == GL_TRUE) glDeleteBuffers(1, &VBO_indices);
     glGenBuffers(1, &VBO_indices); // ATTENTIOn IBO doit etre un GL_ELEMENT_ARRAY_BUFFER
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VBO_indices);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, montore.getFaces().size()*sizeof(Face),&montore.getFaces()[0]  , GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, maprimitive.getFaces().size()*sizeof(Face),&maprimitive.getFaces()[0]  , GL_STATIC_DRAW);
  /*
     if(glIsBuffer(VBO_UVtext) == GL_TRUE) glDeleteBuffers(1, &VBO_UVtext);
     glGenBuffers(1, &VBO_UVtext);
@@ -377,7 +201,6 @@ void deleteVBO ()
 }
 
 
-
 /* fonction d'affichage */
 void affichage()
 {
@@ -389,6 +212,7 @@ void affichage()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glColor3f(1.0,1.0,1.0);
   glPointSize(2.0);
+
  
      View       = glm::lookAt(   cameraPosition, // Camera is at (0,0,3), in World Space
                                             glm::vec3(0,0,0), // and looks at the origin
@@ -398,31 +222,52 @@ void affichage()
      Model = glm::translate(Model,glm::vec3(0,0,cameraDistance));
      Model = glm::rotate(Model,glm::radians(cameraAngleX),glm::vec3(1, 0, 0) );
      Model = glm::rotate(Model,glm::radians(cameraAngleY),glm::vec3(0, 1, 0) );
-     Model = glm::scale(Model,glm::vec3(.8, .8, .8));
-     MVP = Projection * View * Model;
+     Model = glm::scale(Model,glm::vec3(.5, .5, .5));
+     //cout <<transx<<endl;
+
+       for(int i=0 ;i<a.getTaille();i++)
+      {
+        Groupe p=a.getGroupe(i);
+        
+       if(p.show==1)
+       {
+
+         for(int j=0;j<p.getTaille();j++)
+         {
+
+           Primtv pp=p.getPrimtv(j);
+           if(pp.show==1)
+           {
+              genereVBO(pp);
+            // cout<<"trace"<<pp.nom<<endl;
+              MVP = Projection * View* (Model*p.getmodel()*pp.getmodel());
+              traceObjet(pp); 
+           }
+         }
+       
+       }
+          
+      }
+
+          // trace VBO avec ou sans shader
+
+    //Model = glm::translate(Model,glm::vec3(0,0,cameraDistance));
+    //Model = glm::scale(Model,glm::vec3(.2, .2, .2));
+
+
     
-     traceObjet();        // trace VBO avec ou sans shader
-
-Model = glm::translate(Model,glm::vec3(0,0,cameraDistance));
-Model = glm::scale(Model,glm::vec3(.5, .5, .5));
-MVP = Projection * View * Model;
-traceObjet();  
-
- /* on force l'affichage du resultat */
-   glutPostRedisplay();
-   glutSwapBuffers();
+    /* on force l'affichage du resultat */
+      glutPostRedisplay();
+      glutSwapBuffers();
 }
-
 
 
 
 //-------------------------------------
 //Trace le tore 2 via le VAO
-void traceObjet()
+void traceObjet(Primtv maprimitive)
 //-------------------------------------
 {
-  cout<<"tracer l'objet"<<endl;
-   cout<<"tracer jkhvfjkvgjhvjkhl'objet"<<endl;
  // Use  shader & MVP matrix   MVP = Projection * View * Model;
  glUseProgram(programID);
 
@@ -431,10 +276,7 @@ void traceObjet()
  //glUniformMatrix4fv(MatrixIDView, 1, GL_FALSE,&View[0][0]);
  //glUniformMatrix4fv(MatrixIDModel, 1, GL_FALSE, &Model[0][0]);
  //glUniformMatrix4fv(MatrixIDPerspective, 1, GL_FALSE, &Projection[0][0]);
-
  glUniform3f(locCameraPosition,cameraPosition.x, cameraPosition.y, cameraPosition.z);
-
-
 // glUniform1f(locmaterialShininess,materialShininess);
  //glUniform3f(locmaterialSpecularColor,materialSpecularColor.x,materialSpecularColor.y,materialSpecularColor.z);
  glUniform3f(locLightPosition,LightPosition.x,LightPosition.y,LightPosition.z);
@@ -442,12 +284,11 @@ void traceObjet()
  glUniform1f(locLightAttenuation,LightAttenuation);
  glUniform1f(locLightAmbientCoefficient,LightAmbientCoefficient);
 
- 
 //pour l'affichage
-	glBindVertexArray(VAO); // on active le VAO
-   glDrawElements(GL_TRIANGLES,montore.getFaces().size()*sizeof(Face), GL_UNSIGNED_INT, 0);// on appelle la fonction dessin 
-	glBindVertexArray(0);    // on desactive les VAO
-  glUseProgram(0);         // et le pg
+   glBindVertexArray(VAO); // on active le VAO
+   glDrawElements(GL_TRIANGLES,maprimitive.getFaces().size()*sizeof(Face), GL_UNSIGNED_INT, 0);// on appelle la fonction dessin 
+   glBindVertexArray(0);    // on desactive les VAO
+   glUseProgram(0);         // et le pg
 
 }
 
@@ -458,8 +299,9 @@ void reshape(int w, int h)
   int tx, ty, tw, th;
     GLUI_Master.get_viewport_area( &tx, &ty, &tw, &th );
  // glViewport( tx, ty, tw, th );
+   glViewport( tx, ty, tw, th );
 
-    glViewport(tx, ty, (GLsizei)w, (GLsizei)h);// ATTENTION GLsizei important - indique qu'il faut convertir en entier non négatif
+   // glViewport(tx, ty, (GLsizei)w, (GLsizei)h);// ATTENTION GLsizei important - indique qu'il faut convertir en entier non négatif
 
     // set perspective viewing frustum
     aspectRatio = (float)w / h;
@@ -594,44 +436,361 @@ void mouseMotion(int x, int y)
 
 
 
-void createTorus(float R, float r )
-{
-	float theta, phi;
-	theta = ((float)radians(360.f))/((float)NB_R);
-	phi = ((float)(radians(360.f)))/((float)NB_r);
+        void ajouterPrimtv(int i)
+        {
+         // cout <<i<<endl;
+         if(i==0)
+         {
+          Tore tore;
+          tore.init(ToreRayon,Torerayon,complexiter1,complexiter2);
+           a.addPrimtv(tore,groupeCourant);
+         }
+        else if(i==1) {
+          Sphere sphere;
+          sphere.init(SphereRayon,SpherePas);
+           a.addPrimtv(sphere,groupeCourant);
+         }
 
-	float pasU, pasV;
-pasU= 1./NB_R;
-pasV= 1./NB_r;
-for (int i =0;i<=NB_R;i++ )
-for (int j =0;j<=NB_r;j++ )
+
+        else if(i==2) {
+          Cube cube;
+          cube.init(CubeLongueur, CubeLargeur);
+          a.addPrimtv(cube,groupeCourant);
+          }
+
+           else if(i==3) {
+          Cylindre c;
+          c.init(CylindreRayon, Cycomplexiter1,Cycomplexiter2);
+          a.addPrimtv(c,groupeCourant);
+          }
+
+         panneDroit->close();
+
+  
+     interface();
+             }
+   
+
+      void ajouterGroup(int id) {
+        Groupe groupe(NewGroupNom);
+        a.addGroupe(groupe);
+        GroupeNom->set_text("");
+        panneDroit->close();
+        interface();
+      }
+     
+      void defineshow(int i)
+       {
+          a.Changeshow(i);
+          //cout<< a.getPrimtv(i).show<<endl;
+              
+       }
+       void defineshowPrimtv(int j)
+       {
+              a.ChangeshowPrimtv(groupeCourant,j);
+              //cout<< a.getPrimtv(i).show<<endl;
+              
+       }
+
+      void supprimer(int j)
+      {
+        if(primtvCourant==0)
+        a.removeAllPrimtiv(groupeCourant);
+        else
+        a.removePrimtv(groupeCourant,primtvCourant-1);
+        interface();
+      }
+
+void supprimerg(int j)
+      {
+       a.removeGroupe(groupeCourant);
+       groupeCourant=0;
+        interface();
+      }
+
+      void transformations(int i)
+      {
+        if(i==1)
+        {
+            if(primtvCourant==0)
+              for(int i=0 ;i<a.getGroupe(groupeCourant).getTaille();i++)
+                  a.translaterg(vec3(vittessetrans*transx,vittessetrans*transy,-vittessetrans*transz),groupeCourant);
+          
+            else
+            {
+            
+                a.translater(vec3(vittessetrans*transx,vittessetrans*transy,-vittessetrans*transz),groupeCourant,primtvCourant-1);
+            }
+          trans_x->set_x(0.0);
+          trans_y->set_y(0.0);
+          trans_z->set_z(0.0);
+          transx=0;
+          transy=0;
+          transz=0;
+        }
+        if(i==2)
+        {
+             if(primtvCourant==0)
+                {
+                      a.roterg(rotationx,vec3(1,0,0),groupeCourant);
+                      a.roterg(rotationy,vec3(0,1,0),groupeCourant);
+                      a.roterg(rotationz,vec3(0,0,1),groupeCourant);
+                }
+                  
+              else
+                  {
+                      a.roter(rotationx,vec3(1,0,0),groupeCourant,primtvCourant-1);
+                      a.roter(rotationy,vec3(0,1,0),groupeCourant,primtvCourant-1);
+                      a.roter(rotationz,vec3(0,0,1),groupeCourant,primtvCourant-1);
+                  }
+        rotx->set_float_val(0);
+        roty->set_float_val(0);
+        rotz->set_float_val(0);
+        rotationx=0;
+        rotationy=0;
+        rotationz=0;
+        
+              }
+
+         if(i==3)
+        {
+          if(primtvCourant==0)
+           for(int i=0 ;i<a.getGroupe(groupeCourant).getTaille();i++)
+              a.scalerg(vec3(scalx,scaly,scalz),groupeCourant);
+              else
+              a.scaler(vec3(scalx,scaly,scalz),groupeCourant,primtvCourant-1);
+          scalex->set_float_val(1.0);
+          scaley->set_float_val(1.0);
+          scalez->set_float_val(1.0);
+          transx=1;
+          transy=1;
+          transz=1;
+        }
+
+ 
+      
+      }
+ void radiochange(int i)
  {
-float a,b,c;
-	sommets[(i*(NB_r+1)*3)+ (j*3)] =   (R+r*cos((float)j*phi)) * cos((float)i*theta)    ;//x
-	sommets[(i*(NB_r+1)*3)+ (j*3)+1] =  (R+r*cos((float)j*phi)) * sin((float)i*theta)  ;//y
-	sommets[(i*(NB_r+1)*3)+ (j*3)+2] =  r*sin((float)j*phi)  ;
-	
-	normales[(i*(NB_r+1)*3)+ (j*3)] =   cos((float)j*phi)*cos((float)i*theta)    ;//x
-	normales[(i*(NB_r+1)*3)+ (j*3)+1] = cos((float)j*phi)* sin((float)i*theta)  ;//y
-	normales[(i*(NB_r+1)*3)+ (j*3)+2] =  sin((float)j*phi)  ;
-		
-   coordTexture[(i*(NB_r+1)*2)+ (j*2)]= ((float)i)*pasV;
-   coordTexture[(i*(NB_r+1)*2)+ (j*2)+1]= ((float)j)*pasV;
+   interface()
+; }
+      void afficherArbre(GLUI *parentremove)
+
+        {
+            arbre=new GLUI_Rollout(parentremove, "Arbres", true );
+          
+            groupe=new GLUI_Rollout(arbre, "Groupes", true );
+           
+            for(int i=0;i<a.getTaille();i++)
+            {     
+                show=a.getGroupe(i).show;
+                    new GLUI_Checkbox( groupe,a.getGroupe(i).nom.c_str(),&show,i,defineshow);
+                    // new GLUI_StaticText( arbre, "" );
+            }
+            
+              new GLUI_StaticText( groupe, "" );
+        
+            new GLUI_Column( groupe, true );
+            courantGroupe= new GLUI_RadioGroup(groupe,&groupeCourant,-1,radiochange);
+        
+               
+              
+            for(int i=0;i<a.getTaille();i++)
+            {           
+                    
+              new GLUI_RadioButton(courantGroupe,"");
+            }
+          //  new GLUI_Column( arbre, true );
+           if(a.getTaille()>1)
+            new GLUI_Button(groupe, "Supprimer",-1,supprimerg);
+
+
+
+ 
+           primtvs=new GLUI_Rollout(arbre, "Primitives du groupe", true );
+         
+          
+           for(int i=0;i<a.getGroupe(groupeCourant).getTaille();i++)
+            {     
+                show=a.getGroupe(groupeCourant).getPrimtv(i).show;
+                new GLUI_Checkbox( primtvs,a.getGroupe(groupeCourant).getPrimtv(i).nom.c_str(),&show,i,defineshowPrimtv);
+                    // new GLUI_StaticText( arbre, "" );
+            }
+              new GLUI_StaticText( primtvs, "" );
+          
+         
+            new GLUI_Column( primtvs, true );
+            courantPrimtv= new GLUI_RadioGroup(primtvs,&primtvCourant);
+       
+                new GLUI_RadioButton(courantPrimtv,"ALL");
+              
+         for(int i=0;i<a.getGroupe(groupeCourant).getTaille();i++)
+            {           
+                    
+              new GLUI_RadioButton(courantPrimtv,"");
+            }
+             
+              new GLUI_Column( arbre, true );
+            
+            new GLUI_Button(primtvs, "Supprimer",-1,supprimer);
+          
+           
 }
 
-int indiceMaxI =((NB_R+1)*(NB_r))-1;
-int indiceMaxJ= (NB_r+1);
+void afficheAjout(GLUI *parentAdd)
+{     
+        ajoutGroup=new GLUI_Rollout(parentAdd, "Ajout de groupe", true );
+        // for(int i=0; i< a.getTaille();i++) {}
+        GroupeNom  = new GLUI_EditText(ajoutGroup, "Nom", NewGroupNom, -3);
+        // ajout, "Rayon:",&NewGroupNom
+        new GLUI_Button(ajoutGroup, "Ajouter un groupe", -2, ajouterGroup );
 
-for (int i =0;i<NB_R;i++ )
-for (int j =0;j<NB_r;j++ )
-{ 	
-int i0,i1,i2,i3,i4,i5;
- 	 indices[(i*NB_r*6)+ (j*6)]= (unsigned int)((i*(NB_r+1))+ j); 
-   indices[(i*NB_r*6)+ (j*6)+1]=(unsigned int)((i+1)*(NB_r+1)+ (j));
-   indices[(i*NB_r*6)+ (j*6)+2]=(unsigned int)(((i+1)*(NB_r+1))+ (j+1));
-   indices[(i*NB_r*6)+ (j*6)+3]=(unsigned int)((i*(NB_r+1))+ j);
-   indices[(i*NB_r*6)+ (j*6)+4]=(unsigned int)(((i+1)*(NB_r+1))+ (j+1));
-   indices[(i*NB_r*6)+ (j*6)+5]=(unsigned int)(((i)*(NB_r+1))+ (j+1));
+
+        ajout=new GLUI_Rollout(parentAdd, "AjouterPrimitives", true );
+
+        for (int i=0;i< nbPrivDiff;i++)
+        {
+         if(i==0)
+         {
+          Complexiter1  =new GLUI_Spinner( ajout, "pas vertt",&complexiter1);
+          Complexiter1->set_int_limits(10,200);
+          Complexiter2  =new GLUI_Spinner( ajout, "pas horiz",&complexiter2);
+          Complexiter2->set_int_limits(10,200);
+          ToreR  =new GLUI_Spinner( ajout, "Rayon:",&ToreRayon);
+          ToreR->set_float_limits(0.3,1000);
+          Torer  =new GLUI_Spinner( ajout, "Pas:",&Torerayon);
+          Torer->set_float_limits(0.1,990);
+          new GLUI_Button(ajout, "Ajouter un tore", i, ajouterPrimtv );
+
+         }
+        if(i==1)
+         {
+          SphereR  =new GLUI_Spinner( ajout, "Rayon:",&SphereRayon);
+          SphereR->set_float_limits(0.3,1000);
+          SphereP  =new GLUI_Spinner( ajout, "Pas:",&SpherePas);
+          SphereP->set_float_limits(0.1,990);
+         
+          new GLUI_Button(ajout, "Ajouter une sphere", i, ajouterPrimtv );
+
+         }
+         
+        if(i==2)
+        {
+          CubeL =new GLUI_Spinner( ajout, "Longueur:",&CubeLongueur);
+          CubeL->set_float_limits(0.3,1000);
+          Cubel =new GLUI_Spinner( ajout, "Largeur:",&CubeLargeur);
+          Cubel->set_float_limits(0.1,990);
+          new GLUI_Button(ajout, "Ajouter un cube", i, ajouterPrimtv );
+        }
+
+        if(i==3)
+         {
+          CylindrevertP  =new GLUI_Spinner( ajout, "pas vertt",&Cycomplexiter1);
+          CylindrevertP->set_int_limits(10,200);
+          CylindrehorP  =new GLUI_Spinner( ajout, "pas horiz",&Cycomplexiter2);
+          CylindrehorP->set_int_limits(10,200);
+          CylindreR  =new GLUI_Spinner( ajout, "Rayon:",&CylindreRayon);
+          CylindreR->set_float_limits(0.3,1000);
+           new GLUI_Button(ajout, "Ajouter un cylindre", i, ajouterPrimtv );
+         }
+       
+        }
 }
 
+void afficheTransformations(GLUI* panneBas)
+{
+GLUI_Spinner *vittesse  =new GLUI_Spinner( panneBas, "Vittesse de translation:",&vittessetrans);
+          vittesse->set_float_limits(0.00001,0.1);
+        new GLUI_Column( panneBas, false );
+trans_x = new GLUI_Translation(panneBas, "Translation X", GLUI_TRANSLATION_X,&transx,1,transformations );
+        new GLUI_Column( panneBas, false );
+trans_y = new GLUI_Translation(panneBas, "Translation Y", GLUI_TRANSLATION_Y,&transy,1,transformations );
+ new GLUI_Column( panneBas, false );
+trans_z = new GLUI_Translation(panneBas, "Translation Z", GLUI_TRANSLATION_Z,&transz,1,transformations );
+ 
+ new GLUI_Column( panneBas, false );
+rotx= new GLUI_Scrollbar(panneBas, " rotationx",GLUI_SCROLL_HORIZONTAL,&rotationx,2,transformations );
+rotx->set_float_limits(-360.,360.);
+
+roty= new GLUI_Scrollbar(panneBas, " rotationy",GLUI_SCROLL_HORIZONTAL,&rotationy,2,transformations );
+roty->set_float_limits(-360.,360.);
+
+rotz= new GLUI_Scrollbar(panneBas, " rotationz",GLUI_SCROLL_HORIZONTAL,&rotationz,2,transformations );
+rotz->set_float_limits(-360.,360.);
+ new GLUI_Column( panneBas, false );
+scalex  =new GLUI_Spinner( panneBas, "Scalex:",&scalx,3,transformations);
+          scalex->set_float_limits(0.8,1.2);
+           new GLUI_Column( panneBas, false );
+scaley  =new GLUI_Spinner( panneBas, "ScaleY",&scaly,3,transformations);
+          scaley->set_float_limits(0.8,1.2);
+           new GLUI_Column( panneBas, false );
+
+scalez  =new GLUI_Spinner( panneBas, "ScaleZ",&scalz,3,transformations);
+          scalez->set_float_limits(0.8,1.2);
+}
+
+void interface()
+{
+  GLUI_Master.close_all();
+   
+    panneDroit= GLUI_Master.create_glui_subwindow( main_window, GLUI_SUBWINDOW_RIGHT );
+    panneGauche= GLUI_Master.create_glui_subwindow( main_window, GLUI_SUBWINDOW_LEFT );
+    panneBas= GLUI_Master.create_glui_subwindow( main_window, GLUI_SUBWINDOW_BOTTOM );
+  
+     afficherArbre(panneDroit);
+     afficheAjout(panneGauche);
+     afficheTransformations(panneBas);
+    panneDroit->set_main_gfx_window( main_window );
+    panneGauche->set_main_gfx_window( main_window );
+    panneBas->set_main_gfx_window( main_window );
+}
+
+
+int main(int argc,char **argv)
+
+{
+  glutInit(&argc,argv);
+  glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE|GLUT_RGB);
+  glutInitWindowPosition(200,200);
+  glutInitWindowSize(screenWidth,screenHeight);
+  main_window=glutCreateWindow("Mini Modeleur");
+
+  glutDisplayFunc(affichage);
+    GLUI_Master.set_glutReshapeFunc( reshape );  
+    GLUI_Master.set_glutKeyboardFunc( clavier );
+    GLUI_Master.set_glutSpecialFunc( NULL );
+    GLUI_Master.set_glutMouseFunc( mouse );
+    glutMotionFunc( mouseMotion );
+// Initialize GLEW
+	if (glewInit() != GLEW_OK) {
+		fprintf(stderr, "Failed to initialize GLEW\n");
+		return -1;
+	}
+
+//info version GLSL
+std::cout << "***** Info GPU *****" << std::endl;
+    std::cout << "Fabricant : " << glGetString (GL_VENDOR) << std::endl;
+    std::cout << "Carte graphique: " << glGetString (GL_RENDERER) << std::endl;
+    std::cout << "Version : " << glGetString (GL_VERSION) << std::endl;
+    std::cout << "Version GLSL : " << glGetString (GL_SHADING_LANGUAGE_VERSION) << std::endl << std::endl;
+
+	initOpenGL(); 
+  Groupe g1("Default Groupe");
+
+  Cylindre c;
+  c.init(0.5,10,10);
+  Tore t;
+  t.init(0.5,1,10,10);
+c.afficher();
+  a.addGroupe(g1);
+   a.addPrimtv(c,0);
+interface();
+
+ 
+  /* Entree dans la boucle principale glut */
+  glutMainLoop();
+
+  glDeleteProgram(programID);
+  deleteVBO();
+  return 0;
 }

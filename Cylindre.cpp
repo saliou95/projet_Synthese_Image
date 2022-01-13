@@ -1,35 +1,54 @@
 
-#include "Tore.h"
+#include "Cylindre.h"
 using namespace std;
 using namespace glm;
     
-  void Tore::init(GLfloat R, GLfloat r,int nbtgr,int nbtpr)
+  void Cylindre::init(GLfloat R, int nbtgr,int nbtpr)
   {
-    nom="Tore";
+    nom="cylindre";
    
     GLfloat theta, phi;
-    theta = ((GLfloat)radians(360.f))/((GLfloat)nbtgr);
+    theta = 1/((GLfloat)nbtgr);
     phi = ((GLfloat)(radians(360.f)))/((GLfloat)nbtpr);
   	
-    for (int i =0;i<=nbtgr;i++ )
+    for (int i =-1;i<=nbtgr;i++ )
       for (int j =0;j<=nbtpr;j++ )
       {
         GLfloat a=(GLfloat)j*phi;
-        GLfloat b=(GLfloat)i*theta;
+      
         Sommet s;
-
-        s.x =(R+r*cos(a))*cos(b);
-        s.y =(R+r*cos(a))*sin(b);
-        s.z =(r*sin(a));
+        if(i==-1||i==nbtgr)
+        {
+                  s.x =0.;
+                  if(i==-1)
+        s.y =(i+1)*theta;
+        else
+        s.y =(i-1)*theta;
+        s.z =0.;
+        
         addSommet(s);
         Normale n;
-        n.x =(cos(a))*cos(b);
-        n.y =(cos(a))*sin(b);
+        n.x =0;
+        n.y =i*theta;
+        n.z =0;
+        addNormale(n);
+        }
+        else
+        {
+        s.x =R*cos(a);
+        s.y =i*theta;
+        s.z =(R*sin(a));
+        
+        addSommet(s);
+        Normale n;
+        n.x =(cos(a));
+        n.y =i*theta;
         n.z =(sin(a));
         addNormale(n);
+        }
       }
 
-    for (int i =0;i<nbtgr;i++)
+    for (int i =-1;i<=nbtgr;i++)
       for (int j =0;j<nbtpr;j++) 
       { 	
         Face f;

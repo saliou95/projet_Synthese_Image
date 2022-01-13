@@ -1,16 +1,16 @@
 #include "Primtv.h"
+
 using namespace std;
 using namespace glm;
 
      
        Primtv::Primtv()
         {
-          
+            
             
         }
 
-
-
+  
         vector<Sommet> Primtv::getPositions()
         {
             return positions;
@@ -65,6 +65,30 @@ using namespace glm;
     
         }
 
+        void Primtv::miaech(glm::vec3 scamat )
+        {
+            scamodel=scale(scamodel,scamat);
+
+        }
 
 
 
+        void Primtv::translater(glm::vec3 transvect)
+        {
+            transmodel=translate(transmodel,transvect);
+        
+        }
+
+    
+        void Primtv::roter(float angle,glm::vec3 rotmat )
+        {
+             rotmodel=rotate(rotmodel,glm::radians(angle),rotmat);
+
+        }
+
+        mat4 Primtv::getmodel()
+        {
+
+
+            return scamodel*transmodel*rotmodel ;
+        }

@@ -19,7 +19,9 @@ static int facesIndices[] = {
          }; 
   void Cube::init(GLfloat L,GLfloat l)
   {
-    static const GLfloat vertex3d[] = {
+
+    GLfloat vertex3d[] = {
+
 
         -1*L, -1*l,  1*l, //0
         -1*L,  1*l,  1*l, //1
@@ -33,7 +35,7 @@ static int facesIndices[] = {
     for(int i=0; i<32; i=i+3) {
       Sommet s = creerSommet(vertex3d[i], vertex3d[i+1], vertex3d[i+2]);
       addSommet(s);
-      cout<<i<<" "<<vertex3d[i]<<" "<<vertex3d[i+1]<<" "<< vertex3d[i+2]<<" "<<endl;
+
     }
     for(int i=0; i<36; i=i+3) {
       Face face;

@@ -3,41 +3,58 @@
 #include "Sphere.h"
 using namespace std;
 using namespace glm;
-#ifndef PI
-#define PI 3.14159265358979323846
-#endif
-  void Sphere::init(GLfloat rayon,int pas, int sectors) // pour tester prendre par exemple rayon = 1, pas= 50 et sectors = 50
+  void Sphere::init(GLfloat rayon,int pas) // pour tester prendre par exemple rayon = 1, pas= 50 et sectors = 50
   {
-    float p = 1./(float)(pas-1);
-    float S = 1./(float)(sectors-1);
+     nom="Sphere";
+
+    float p =((GLfloat)radians(360.f))/(float)(pas);
+    float S = ((GLfloat)radians(180.f))/(float)(pas);
     Sommet sommet;
-    for(int r=0; r<pas;++r) {
-        for(int s=0;s<sectors;++s) {
-            GLfloat y = rayon*sin(-M_PI_2 + M_PI *r*p);
-            GLfloat x = rayon*cos(2*PI*s*S)*sin(PI*r*p );
-            GLfloat z = rayon*sin(2*PI*s*S)*sin(PI*r*p );
+
+    
+      for (int j =0;j<=pas;j++ )
+      for (int i =0;i<=pas;i++ )
+      {
+            float pp=-((GLfloat)radians(180.f))+(p*i);
+            float SS=-((GLfloat)radians(90.f))+S*j;
+            GLfloat y = rayon*sin(pp)*cos(SS);
+            GLfloat x = rayon*cos(pp)*cos(SS);
+            GLfloat z = rayon*sin(SS);
+           
+
             sommet.x=x;
             sommet.y=y;
             sommet.z=z;
             addSommet(sommet);
-            int curRow = r * sectors;
-            int nextRow = (r+1) * sectors;
-            if(r<pas-1) {
-              Face face;
-              face.indiceS1 = curRow + s;
-              face.indiceS2 = nextRow + s;
-              face.indiceS3 = nextRow + (s+1);
-              Face face2;
-              addFace(face);
-              face2.indiceS1 = curRow + s;
-              face2.indiceS2 = nextRow + (s+1);
-              face2.indiceS3 = curRow + (s+1);
-              addFace(face2);
-            }
+
+
+            Face f;
+        Face f2;
+        f.indiceS1=(unsigned int)((i*(pas))+ j);   
+        f.indiceS2=(unsigned int)((i+1)*(pas)+ (j));
+        f.indiceS3=(unsigned int)(((i+1)*(pas))+ (j+1));
+
+        f2.indiceS1=(unsigned int)((i*(pas))+ j);
+        f2.indiceS2=(unsigned int)(((i+1)*(pas))+ (j+1));
+        f2.indiceS3=(unsigned int)(((i)*(pas))+ (j+1));
+
+          Normale n;
+        n.x =(cos(pp))*cos(SS);
+        n.y =(cos(pp))*cos(SS);
+        n.z =(sin(SS));
+        addNormale(n);
+        addFace(f);
+        addFace(f2);
+
+      }
+   
+ 
+    
             
-        }
-    }
-}
+ }
+    
+
+
 
         
           
