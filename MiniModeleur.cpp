@@ -1,5 +1,3 @@
-
-//#include "../utilstexture/sdlglutils.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <iostream>
 #include <sstream>
@@ -41,11 +39,9 @@ void drawString(const char *str, int x, int y, float color[4], void *font);
 void showInfo();
 void interface();
 void ajouterPrimtv();
-
 void afficherArbre(GLUI *panneDroit);
 void afficheAjout(GLUI* panneGauche);
 void afficheTransformations(GLUI* panneBas);
-void *font = GLUT_BITMAP_8_BY_13; // pour afficher des textes 2D sur l'ecran
 // variables globales pour OpenGL
 bool mouseLeftDown;
 bool mouseRightDown;
@@ -61,10 +57,8 @@ GLfloat CylindreRayon=0.5;
 GLfloat ToreRayon=1,Torerayon=0.1;
 GLfloat SphereRayon = 1.0, SpherePas = 30;
 GLfloat CubeLongueur = 1.0, CubeLargeur = 1;
-
 // std::string NewGroupNom;
 char  NewGroupNom[20] = {""};
-
 // variables Handle d'opengl 
 //--------------------------
 GLuint programID;   // handle pour le shader
@@ -80,7 +74,7 @@ GLuint locLightAmbientCoefficient;
 
 // location des VBO
 //------------------
-GLuint indexVertex=0, indexUVTexture=2, indexNormale=3 ;
+GLuint indexVertex=0,  indexNormale=3 ;
 
 //variable pour paramétrage eclairage
 //--------------------------------------
@@ -98,7 +92,7 @@ GLfloat LightAttenuation =1.;
 GLfloat LightAmbientCoefficient=.1;
 
 glm::mat4 MVP;    
-glm::mat4 MVP2;   // justement la voilà
+   // justement la voilà
 glm::mat4 Model, View, Projection;    // Matrices constituant MVP
 
 int screenHeight = 500;
@@ -125,13 +119,7 @@ GLUI_Spinner *CubeL, * Cubel;
  vec3 traansAll;
  GLfloat rotationx=0,rotationy=0,rotationz=0;
  Arbre a;
-
-
  int nbPrimtv=0;
-
-
- 
-
 
 //----------------------------------------
 void initOpenGL(void)
@@ -171,16 +159,10 @@ void genereVBO (Primtv maprimitive)
     glGenBuffers(1, &VBO_indices); // ATTENTIOn IBO doit etre un GL_ELEMENT_ARRAY_BUFFER
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VBO_indices);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, maprimitive.getFaces().size()*sizeof(Face),&maprimitive.getFaces()[0]  , GL_STATIC_DRAW);
- /*
-    if(glIsBuffer(VBO_UVtext) == GL_TRUE) glDeleteBuffers(1, &VBO_UVtext);
-    glGenBuffers(1, &VBO_UVtext);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO_UVtext);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(coordTexture),coordTexture , GL_STATIC_DRAW);
-    glVertexAttribPointer (indexUVTexture, 2, GL_FLOAT, GL_FALSE, 0,  (void*)0  );
- */
+
    glEnableVertexAttribArray(indexVertex);
    glEnableVertexAttribArray(indexNormale );
-   //glEnableVertexAttribArray(indexUVTexture);
+
  
    
 // une fois la config terminée   
@@ -249,11 +231,6 @@ void affichage()
           
       }
 
-          // trace VBO avec ou sans shader
-
-    //Model = glm::translate(Model,glm::vec3(0,0,cameraDistance));
-    //Model = glm::scale(Model,glm::vec3(.2, .2, .2));
-
 
     
     /* on force l'affichage du resultat */
@@ -273,12 +250,9 @@ void traceObjet(Primtv maprimitive)
 
 //on envoie les données necessaires aux shaders */
  glUniformMatrix4fv(MatrixIDMVP, 1, GL_FALSE, &MVP[0][0]);
- //glUniformMatrix4fv(MatrixIDView, 1, GL_FALSE,&View[0][0]);
- //glUniformMatrix4fv(MatrixIDModel, 1, GL_FALSE, &Model[0][0]);
- //glUniformMatrix4fv(MatrixIDPerspective, 1, GL_FALSE, &Projection[0][0]);
+
  glUniform3f(locCameraPosition,cameraPosition.x, cameraPosition.y, cameraPosition.z);
-// glUniform1f(locmaterialShininess,materialShininess);
- //glUniform3f(locmaterialSpecularColor,materialSpecularColor.x,materialSpecularColor.y,materialSpecularColor.z);
+
  glUniform3f(locLightPosition,LightPosition.x,LightPosition.y,LightPosition.z);
  glUniform3f(locLightIntensities,LightIntensities.x,LightIntensities.y,LightIntensities.z);
  glUniform1f(locLightAttenuation,LightAttenuation);
@@ -298,12 +272,11 @@ void reshape(int w, int h)
 
   int tx, ty, tw, th;
     GLUI_Master.get_viewport_area( &tx, &ty, &tw, &th );
- // glViewport( tx, ty, tw, th );
+
    glViewport( tx, ty, tw, th );
 
-   // glViewport(tx, ty, (GLsizei)w, (GLsizei)h);// ATTENTION GLsizei important - indique qu'il faut convertir en entier non négatif
-
-    // set perspective viewing frustum
+  
+  
     aspectRatio = (float)w / h;
 
     Projection = glm::perspective(glm::radians(60.0f),(float)(w)/(float)h, 1.0f, 1000.0f);
@@ -431,14 +404,9 @@ void mouseMotion(int x, int y)
 }
 
 
-
-
-
-
-
-        void ajouterPrimtv(int i)
+void ajouterPrimtv(int i)
         {
-         // cout <<i<<endl;
+       
          if(i==0)
          {
           Tore tore;
@@ -482,13 +450,13 @@ void mouseMotion(int x, int y)
       void defineshow(int i)
        {
           a.Changeshow(i);
-          //cout<< a.getPrimtv(i).show<<endl;
+         
               
        }
        void defineshowPrimtv(int j)
        {
               a.ChangeshowPrimtv(groupeCourant,j);
-              //cout<< a.getPrimtv(i).show<<endl;
+             
               
        }
 
@@ -572,8 +540,8 @@ void supprimerg(int j)
       }
  void radiochange(int i)
  {
-   interface()
-; }
+   interface();
+ }
       void afficherArbre(GLUI *parentremove)
 
         {
@@ -584,11 +552,11 @@ void supprimerg(int j)
             for(int i=0;i<a.getTaille();i++)
             {     
                 show=a.getGroupe(i).show;
-                    new GLUI_Checkbox( groupe,a.getGroupe(i).nom.c_str(),&show,i,defineshow);
-                    // new GLUI_StaticText( arbre, "" );
+                new GLUI_Checkbox( groupe,a.getGroupe(i).nom.c_str(),&show,i,defineshow);
+                // new GLUI_StaticText( arbre, "" );
             }
             
-              new GLUI_StaticText( groupe, "" );
+            new GLUI_StaticText( groupe, "" );
         
             new GLUI_Column( groupe, true );
             courantGroupe= new GLUI_RadioGroup(groupe,&groupeCourant,-1,radiochange);
@@ -596,8 +564,7 @@ void supprimerg(int j)
                
               
             for(int i=0;i<a.getTaille();i++)
-            {           
-                    
+            {             
               new GLUI_RadioButton(courantGroupe,"");
             }
           //  new GLUI_Column( arbre, true );
@@ -640,9 +607,9 @@ void supprimerg(int j)
 void afficheAjout(GLUI *parentAdd)
 {     
         ajoutGroup=new GLUI_Rollout(parentAdd, "Ajout de groupe", true );
-        // for(int i=0; i< a.getTaille();i++) {}
+
         GroupeNom  = new GLUI_EditText(ajoutGroup, "Nom", NewGroupNom, -3);
-        // ajout, "Rayon:",&NewGroupNom
+       
         new GLUI_Button(ajoutGroup, "Ajouter un groupe", -2, ajouterGroup );
 
 
@@ -658,7 +625,7 @@ void afficheAjout(GLUI *parentAdd)
           Complexiter2->set_int_limits(10,200);
           ToreR  =new GLUI_Spinner( ajout, "Rayon:",&ToreRayon);
           ToreR->set_float_limits(0.3,1000);
-          Torer  =new GLUI_Spinner( ajout, "Pas:",&Torerayon);
+          Torer  =new GLUI_Spinner( ajout, "rayon:",&Torerayon);
           Torer->set_float_limits(0.1,990);
           new GLUI_Button(ajout, "Ajouter un tore", i, ajouterPrimtv );
 
@@ -776,14 +743,8 @@ std::cout << "***** Info GPU *****" << std::endl;
 
 	initOpenGL(); 
   Groupe g1("Default Groupe");
-
-  Cylindre c;
-  c.init(0.5,10,10);
-  Tore t;
-  t.init(0.5,1,10,10);
-c.afficher();
   a.addGroupe(g1);
-   a.addPrimtv(c,0);
+
 interface();
 
  

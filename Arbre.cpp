@@ -70,14 +70,6 @@ using namespace glm;
         }
 
 
-
-
-
-
-
-
-
-
         void Arbre::translater(vec3 vec,int i,int j)
         {
           lesGroupe[i].translater(vec,j);

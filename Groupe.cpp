@@ -43,7 +43,7 @@ using namespace glm;
 
         } 
 
-    void Groupe::Changeshow(int i)
+       void Groupe::Changeshow(int i)
         {
             if(lesPrimitives[i].show==1)
                 lesPrimitives[i].show=0;
@@ -69,7 +69,7 @@ using namespace glm;
     
 
 
- void Groupe::scalerg(glm::vec3 scamat )
+       void Groupe::scalerg(glm::vec3 scamat )
         {
             scamodel=scale(scamodel,scamat);
 

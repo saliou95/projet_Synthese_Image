@@ -28,8 +28,6 @@ class Arbre
            
            void Changeshow(int i);
 
-           
-           
            void addPrimtv(Primtv p,int j);
           
            void removePrimtv (int i,int j); 
@@ -43,10 +41,6 @@ class Arbre
            void roter(float angle,glm::vec3 rotmat,int i ,int j);
          
            void scaler(glm::vec3 scamat,int i,int j);
-
-
-
-
 
            void translaterg(glm::vec3,int i);
        
