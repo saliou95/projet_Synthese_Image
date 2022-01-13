@@ -660,7 +660,7 @@ void afficheAjout(GLUI *parentAdd)
           Complexiter2->set_int_limits(10,200);
           ToreR  =new GLUI_Spinner( ajout, "Rayon:",&ToreRayon);
           ToreR->set_float_limits(0.3,1000);
-          Torer  =new GLUI_Spinner( ajout, "Pas:",&Torerayon);
+          Torer  =new GLUI_Spinner( ajout, "rayon:",&Torerayon);
           Torer->set_float_limits(0.1,990);
           new GLUI_Button(ajout, "Ajouter un tore", i, ajouterPrimtv );
 
@@ -780,14 +780,8 @@ std::cout << "***** Info GPU *****" << std::endl;
 	initOpenGL(); 
   Groupe g1("Default Groupe");
 
-  Cylindre c;
-  c.init(0.5,10,10);
-  Tore t;
-  t.init(0.5,1,10,10);
-c.afficher();
   a.addGroupe(g1);
-   a.addPrimtv(c,0);
-interface();
+  interface();
 
  
   /* Entree dans la boucle principale glut */

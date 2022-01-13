@@ -19,6 +19,7 @@ static int facesIndices[] = {
          }; 
   void Cube::init(GLfloat L,GLfloat l)
   {
+    nom="Cube";
     GLfloat vertex3d[] = {
 
         -1*L, -1*l,  1*l, //0
