@@ -16,17 +16,17 @@ class Arbre
     public:
            Arbre();
 
-           Groupe getGroupe(int i);
+           Groupe getGroupe(int i); // Récupérer l'identifiant de l'arbre
 
-           int getTaille();
+           int getTaille();        // Récupérer la taille de l'arbre (Nombre de groupe de l'arbre)
 
-           void addGroupe(Groupe p);
+           void addGroupe(Groupe p); // Ajouter un groupe à l'arbre
           
-           void removeGroupe (int i); 
+           void removeGroupe (int i); // Supprimer un groupe de l'arbre
          
-           void removeAll(); 
+           void removeAll(); // Supprimer tous les groupes de l'arbre
            
-           void Changeshow(int i);
+           void Changeshow(int i); // 
 
            
            

@@ -354,7 +354,7 @@ void genereVBO ()
    //glEnableVertexAttribArray(indexUVTexture);
  
    
-// une fois la config terminée   
+// une fois la configuration terminée   
    // on désactive le dernier VBO et le VAO pour qu'ils ne soit pas accidentellement modifié 
  glBindBuffer(GL_ARRAY_BUFFER, 0);
  glBindVertexArray(0);
@@ -385,9 +385,9 @@ void affichage()
   glColor3f(1.0,1.0,1.0);
   glPointSize(2.0);
  
-     View       = glm::lookAt(   cameraPosition, // Camera is at (0,0,3), in World Space
-                                            glm::vec3(0,0,0), // and looks at the origin
-                                            glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+     View       = glm::lookAt(   cameraPosition, 
+                                            glm::vec3(0,0,0), 
+                                            glm::vec3(0,1,0) 
                                              );
      Model = glm::mat4(1.0f);
      Model = glm::translate(Model,glm::vec3(0,0,cameraDistance));
@@ -412,12 +412,12 @@ traceObjet();
 
 
 //-------------------------------------
-//Trace le tore 2 via le VAO
+//Tracé via le VAO
 void traceObjet()
 //-------------------------------------
 {
-  cout<<"tracer l'objet"<<endl;
-   cout<<"tracer jkhvfjkvgjhvjkhl'objet"<<endl;
+  // cout<<"tracer l'objet"<<endl;
+  // cout<<"tracer jkhvfjkvgjhvjkhl'objet"<<endl;
  // Use  shader & MVP matrix   MVP = Projection * View * Model;
  glUseProgram(programID);
 

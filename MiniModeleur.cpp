@@ -27,24 +27,24 @@ using namespace glm;
 using namespace std;
 
 
-// initialisations
+// initialisations des fonctions principales
 
-void genereVBO();
-void deleteVBO();
-void traceObjet(Primtv montore);
-void affichage();
-void clavier(unsigned char,int,int);
-void mouse(int, int, int, int);
-void mouseMotion(int, int);
+void genereVBO(); // Elle génère les VBO d'une primitive
+void deleteVBO(); // Trace la primitive via le VAO
+void traceObjet(Primtv primtv);
+void affichage(); // Cette fonction affiche la ou les primitives en fonction du groupe selectionné ou de la primitive selectionnée.
+void clavier(unsigned char,int,int); // Gestion des évenements de saisis du clavier
+void mouse(int, int, int, int); // Gestion des évenements de clic de la souris
+void mouseMotion(int, int); // Gestion des évenements de la souris
 void reshape(int,int);
 void drawString(const char *str, int x, int y, float color[4], void *font);
 void showInfo();
-void interface();
-void ajouterPrimtv();
+void interface(); // S'occupe du rendu de l'interface graphique
+void ajouterPrimtv(); // S'occupe de l'ajout d'une primitive i au groupe courant (groupe séléctionné)
 
-void afficherArbre(GLUI *panneDroit);
-void afficheAjout(GLUI* panneGauche);
-void afficheTransformations(GLUI* panneBas);
+void afficherArbre(GLUI *panneDroit);     // Affiche dans l'interface graphique le panneau droit (Panneau de gestion des Groupes et Primitive)
+void afficheAjout(GLUI* panneGauche);     // Affiche dans l'interface graphique le panneau gauche (Panneau d'ajout de primitives)
+void afficheTransformations(GLUI* panneBas);  // Affiche dans l'interface graphique le panneau bas (Panneau de gestion des transformation de Primitive)
 void *font = GLUT_BITMAP_8_BY_13; // pour afficher des textes 2D sur l'ecran
 // variables globales pour OpenGL
 bool mouseLeftDown;
@@ -138,7 +138,7 @@ void initOpenGL(void)
 //----------------------------------------
 {
   glCullFace (GL_BACK); // on spécifie queil faut éliminer les face arriere
-  glEnable(GL_CULL_FACE); // on active l'élimination des faces qui par défaut n'est pas active
+  glEnable(GL_CULL_FACE); // on active l'élimination des faces qui par défaut n'est pas active 
   glEnable(GL_DEPTH_TEST); 
   programID = LoadShaders( "PhongShader.vert", "PhongShader.frag" );
   MatrixIDMVP = glGetUniformLocation(programID, "MVP");
@@ -264,7 +264,7 @@ void affichage()
 
 
 //-------------------------------------
-//Trace le tore 2 via le VAO
+//Trace la primitive via le VAO
 void traceObjet(Primtv maprimitive)
 //-------------------------------------
 {
@@ -435,7 +435,7 @@ void mouseMotion(int x, int y)
 
 
 
-
+      // Fonction d'ajout de primitive dans le groupe de primitive séléctionner
         void ajouterPrimtv(int i)
         {
          // cout <<i<<endl;
@@ -572,8 +572,8 @@ void supprimerg(int j)
       }
  void radiochange(int i)
  {
-   interface()
-; }
+   interface(); 
+ }
       void afficherArbre(GLUI *parentremove)
 
         {
@@ -637,6 +637,8 @@ void supprimerg(int j)
            
 }
 
+
+// S'occupe du rendu du panneau d'ajout de primitive et de groupe
 void afficheAjout(GLUI *parentAdd)
 {     
         ajoutGroup=new GLUI_Rollout(parentAdd, "Ajout de groupe", true );
@@ -699,7 +701,7 @@ void afficheAjout(GLUI *parentAdd)
 
 void afficheTransformations(GLUI* panneBas)
 {
-GLUI_Spinner *vittesse  =new GLUI_Spinner( panneBas, "Vittesse de translation:",&vittessetrans);
+GLUI_Spinner *vittesse  =new GLUI_Spinner( panneBas, "Vitesse de translation:",&vittessetrans);
           vittesse->set_float_limits(0.00001,0.1);
         new GLUI_Column( panneBas, false );
 trans_x = new GLUI_Translation(panneBas, "Translation X", GLUI_TRANSLATION_X,&transx,1,transformations );
@@ -728,6 +730,7 @@ scaley  =new GLUI_Spinner( panneBas, "ScaleY",&scaly,3,transformations);
 scalez  =new GLUI_Spinner( panneBas, "ScaleZ",&scalz,3,transformations);
           scalez->set_float_limits(0.8,1.2);
 }
+
 
 void interface()
 {
