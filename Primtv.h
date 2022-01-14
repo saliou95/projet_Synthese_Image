@@ -35,39 +35,37 @@ typedef struct {
        
 } Normale ;
 
-
+// Classe générique d'une primitive
 class Primtv
 {
     public:
            Primtv();
 
-           std::vector<Sommet> getPositions();
-           std::vector<Face> getFaces();
-           std::vector<Normale> getNormales();
+           std::vector<Sommet> getPositions(); // Récupére la liste des sommets de la primitive
+           std::vector<Face> getFaces(); // Récupére liste des faces de la primitive
+           std::vector<Normale> getNormales(); // Récupère la liste des Normales de la primitives
            glm::mat4 getmodel();
        
            void afficher();
-           void addSommet(Sommet s);
-           void addFace(Face f);
-           void addNormale(Normale n);
+           void addSommet(Sommet s);    // Ajoute un sommet à la liste des sommets
+           void addFace(Face f);        // Ajout une face à la liste des faces
+           void addNormale(Normale n);  // Ajoute une normale à la liste des normales
            void miaech(glm::vec3 scamat );
-           void translater(glm::vec3 transvect );
-           void roter(float angle,glm::vec3 rotmat );
-           void Changeshow();
+           void translater(glm::vec3 transvect ); // Appliquer une translation du la primitive
+           void roter(float angle,glm::vec3 rotmat ); // Appliquer une rotation sur la primitive
+           void Changeshow();                         // Afficher ou cacher la primitive
     protected:
-             std::vector<Sommet> positions;
-             std::vector<Face> faces;
-             std::vector<Normale> normales; 
+             std::vector<Sommet> positions; // la liste des sommets de la primitive
+             std::vector<Face> faces;       // liste des faces de la primitive
+             std::vector<Normale> normales; // liste des Normales de la primitives
           
            //  glm::mat4 model=glm::mat4(1.0);
-             glm::mat4 rotmodel=glm::mat4(1.0f);
-             glm::mat4 transmodel=glm::mat4(1.0f);
+             glm::mat4 rotmodel=glm::mat4(1.0f);        // Initialisation de la matrice de rotation
+             glm::mat4 transmodel=glm::mat4(1.0f);      
              glm::mat4 scamodel=glm::mat4(1.0f);
     public:
              int show=1;
              std::string nom;
-        
-            
 };
 
 #endif

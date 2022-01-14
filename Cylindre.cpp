@@ -5,7 +5,7 @@ using namespace glm;
     
   void Cylindre::init(GLfloat R, int nbtgr,int nbtpr)
   {
-    nom="cylindre";
+    nom="Cylindre";
    
     GLfloat theta, phi;
     theta = 1/((GLfloat)nbtgr);
