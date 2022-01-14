@@ -9,13 +9,13 @@ layout (location =3) in vec3 normale;//recuperation des normale
 out vec4 color ;
 out vec4 fragPosition;
 out vec4 fragNormale;
-out mat4 mvp;
+
 void main(){
 
     color=vec4(position,1.0);
 
     gl_Position= MVP* vec4(position,1.0);
-	mvp=MVP;
+	
     fragPosition =MVP* vec4(position,1.0);
 	fragNormale =vec4(normalize(normale),1.0);
 

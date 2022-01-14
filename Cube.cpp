@@ -37,6 +37,11 @@ static int facesIndices[] = {
     for(int i=0; i<32; i=i+3) {
       Sommet s = creerSommet(vertex3d[i], vertex3d[i+1], vertex3d[i+2]);
       addSommet(s);
+      Normale n;
+      n.x=vertex3d[i];
+      n.y=vertex3d[i+1]; 
+      n.z=vertex3d[i+2];
+      addNormale(n);
 
     }
     //faces du cube
