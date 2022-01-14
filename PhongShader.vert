@@ -2,10 +2,10 @@
 
 
 
-uniform mat4 MVP;
+uniform mat4 MVP;//recuperation de la matrice mvp
 
 layout(location = 0) in vec3 position; // le location permet de dire de quel flux/canal on récupère les données (doit être en accord avec le location du code opengl)
-layout (location =3) in vec3 normale;
+layout (location =3) in vec3 normale;//recuperation des normale
 out vec4 color ;
 out vec4 fragPosition;
 out vec4 fragNormale;

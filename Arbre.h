@@ -26,27 +26,27 @@ class Arbre
          
            void removeAll(); // Supprimer tous les groupes de l'arbre
            
-           void Changeshow(int i); // 
+           void Changeshow(int i); // change l'affichage ou non dun groupe
 
-           void addPrimtv(Primtv p,int j);
+           void addPrimtv(Primtv p,int j);//ajouter une primitive a au groupe j
           
-           void removePrimtv (int i,int j); 
+           void removePrimtv (int i,int j); //enleve la pimitive i dans le groupe j
          
-           void removeAllPrimtiv(int j); 
+           void removeAllPrimtiv(int j); //supprime toutes les primitives de j
            
-           void ChangeshowPrimtv(int i,int j);
+           void ChangeshowPrimtv(int i,int j);// change l'affichage ou non affcihage de la primitive i du groupe j
 
-           void translater(glm::vec3,int i,int j);
+           void translater(glm::vec3,int i,int j);//translation de la primitive i du groupe j
        
-           void roter(float angle,glm::vec3 rotmat,int i ,int j);
+           void roter(float angle,glm::vec3 rotmat,int i ,int j);//rotaion de la primitive i du groupe j
          
-           void scaler(glm::vec3 scamat,int i,int j);
+           void scaler(glm::vec3 scamat,int i,int j);//mise a echelle de la primitive i du groupe j
 
-           void translaterg(glm::vec3,int i);
+           void translaterg(glm::vec3,int i);//translation  du groupe i
        
-           void roterg(float angle,glm::vec3 rotmat,int i );
-         
-           void scalerg(glm::vec3 scamat,int i);
+           void roterg(float angle,glm::vec3 rotmat,int i );//rotation du groupe i
+
+           void scalerg(glm::vec3 scamat,int i);//mise a echelle du groupe i
     protected:
              std::vector<Groupe> lesGroupe;
             

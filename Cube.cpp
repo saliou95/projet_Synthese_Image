@@ -3,6 +3,7 @@
 using namespace std;
 using namespace glm;
 Sommet creerSommet(float x, float y, float z);
+//sommet du cube
 static int facesIndices[] = { 
          0,2,1,
          1,2,6,
@@ -38,6 +39,7 @@ static int facesIndices[] = {
       addSommet(s);
 
     }
+    //faces du cube
     for(int i=0; i<36; i=i+3) {
       Face face;
       face.indiceS1=facesIndices[i];

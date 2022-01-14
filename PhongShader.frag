@@ -12,6 +12,7 @@ vec4 speculaire;
 in mat4 mvp;
 void main() 
 {
+    //calcule de lumiere avec phong 
     vec4 dirdif= normalize(fragPosition)-normalize(mvp*vec4(light.position,1.0));
     float angledif=dot(dirdif,fragNormale);
     float anglespecN=acos(max(dot(dirdif,fragNormale),0));

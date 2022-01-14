@@ -14,6 +14,7 @@ using namespace glm;
     for (int i =-1;i<=nbtgr;i++ )
       for (int j =0;j<=nbtpr;j++ )
       {
+        //calcule des sommets et normal
         GLfloat a=(GLfloat)j*phi;
       
         Sommet s;
@@ -48,6 +49,7 @@ using namespace glm;
         }
       }
 
+//calcules des faces
     for (int i =-1;i<=nbtgr;i++)
       for (int j =0;j<nbtpr;j++) 
       { 	
